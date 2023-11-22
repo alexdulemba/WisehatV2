@@ -1,0 +1,20 @@
+﻿/* SCSS HEX */
+/* SCSS HSL */
+/* SCSS RGB */
+/* SCSS Gradient */
+a {
+  margin-right: 16px;
+  background-color: rgb(228, 146, 115);
+  color: rgb(43, 69, 112);
+  text-decoration: none;
+  padding: 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: 0.3s ease all;
+}
+a:hover {
+  padding: 10px;
+}
+a:active {
+  filter: brightness(0.8);
+}

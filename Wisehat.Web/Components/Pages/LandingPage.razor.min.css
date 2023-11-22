@@ -1,0 +1,1 @@
+﻿#landing-container{padding:16px;width:calc(100% - 32px);height:calc(100% - 32px);display:flex;flex-direction:column;justify-content:center;align-items:center;}#landing-container h1{flex:1 0 auto;color:#a8d0db;}#landing-container p{font-weight:600;color:#a8d0db;}

@@ -1,0 +1,34 @@
+﻿[
+  {
+    "outputFile": "Components/Pages/LandingPage.razor.css",
+    "inputFile": "Components/Pages/LandingPage.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/Index.razor.css",
+    "inputFile": "Components/Pages/Index.razor.scss"
+  },
+  {
+    "outputFile": "wwwroot/theme.css",
+    "inputFile": "wwwroot/theme.scss"
+  },
+  {
+    "outputFile": "Components/AccessControl.razor.css",
+    "inputFile": "Components/AccessControl.razor.scss"
+  },
+  {
+    "outputFile": "Components/ProjectListing.razor.css",
+    "inputFile": "Components/ProjectListing.razor.scss"
+  },
+  {
+    "outputFile": "Components/Layout/MainLayout.razor.css",
+    "inputFile": "Components/Layout/MainLayout.razor.scss"
+  },
+  {
+    "outputFile": "wwwroot/site.css",
+    "inputFile": "wwwroot/site.scss"
+  },
+  {
+    "outputFile": "Components/Pages/WebProjectEditor.razor.css",
+    "inputFile": "Components/Pages/WebProjectEditor.razor.scss"
+  }
+]

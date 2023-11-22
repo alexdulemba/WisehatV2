@@ -1,0 +1,22 @@
+@import "../../wwwroot/theme.scss";
+
+#landing-container {
+  $padding: 16px;
+  padding: $padding;
+  width: calc(100% - (2 * $padding));
+  height: calc(100% - (2 * $padding));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  h1 {
+    flex: 1 0 auto;
+    color: $light-blue;
+  }
+
+  p {
+    font-weight: 600;
+    color: $light-blue;
+  }
+}

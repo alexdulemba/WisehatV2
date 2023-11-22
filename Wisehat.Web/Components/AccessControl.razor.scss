@@ -1,0 +1,20 @@
+@import "../wwwroot/theme.scss";
+
+a {
+  margin-right: 16px;
+  background-color: $atomic-tangerine;
+  color: $marian-blue;
+  text-decoration: none;
+  padding: 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: 0.3s ease all;
+
+  &:hover {
+    padding: 10px;
+  }
+
+  &:active {
+    filter: brightness(0.8);
+  }
+}

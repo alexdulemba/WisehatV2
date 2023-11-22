@@ -1,0 +1,11 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
+<AuthorizeView>
+  <Authorized>
+    <a href="logout">Logout</a>
+  </Authorized>
+  <NotAuthorized>
+    <a href="login?redirectUrl=/home">Login</a>
+  </NotAuthorized>
+</AuthorizeView>
+

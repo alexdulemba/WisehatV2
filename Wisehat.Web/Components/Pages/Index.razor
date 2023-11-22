@@ -1,0 +1,97 @@
+﻿@page "/home"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Wisehat.Domain.Commands.WebProjects
+@using Wisehat.Domain.Entities;
+@using MediatR
+@using Wisehat.Domain.Queries.WebProjects
+@inject ISender Sender
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@attribute [Authorize]
+
+<div id="project-listings">
+  <div id="project-listings-title">Your Projects</div>
+  <div id="btn-container">
+    <button type="button" id="create-new-project-btn" @onclick="ToggleModal">+ New Project</button>
+  </div>
+  <div id="project-listings-container">
+    <div id="project-listings-headers">
+      <p>Name</p>
+      <p>Last Modified</p>
+      <p>Actions</p>
+    </div>
+    @if (Projects is not null && Projects.Count() > 0)
+    {
+      foreach (var project in Projects)
+      {
+        <ProjectListing ProjectId="@project.Id" ProjectName="@project.Name" LastModified="project.LastModified" ParentStateChanger="StateHasChanged"/>
+      }
+    }
+    else
+    {
+      <div id="no-projects-message">
+        No projects yet. Click "New Project" to create one!
+      </div>
+    }
+  </div>
+  <div id="create-project-modal-backdrop" style="display: @ShowCreateModal">
+    <div id="create-project-modal">
+      <h2>Create New Project</h2>
+      <form method="post" id="project-name-form" @onsubmit="@Submit">
+        <input id="project-name-input" type="text" placeholder="Project name" @bind-value="@ProjectName" required autocomplete="off" />
+      </form>
+      <div id="modal-btns">
+        <button type="button" @onclick="ToggleModal">Cancel</button>
+        <button type="submit" @onclick="ToggleModal" form="project-name-form">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@code {
+  [CascadingParameter]
+  public Task<AuthenticationState>? Authentication { get; set; }
+
+  private List<WebProject>? Projects { get; set; }
+
+  private string? _profileId;
+  protected override async Task OnInitializedAsync()
+  {
+    if (Authentication is not null)
+    {
+      var authState = await Authentication;
+      var claims = authState.User.Claims;
+      var nameIdentifierClaim = claims.FirstOrDefault(c => c.Type.Contains("nameidentifier"));
+
+      if (nameIdentifierClaim is not null)
+      {
+        _profileId = nameIdentifierClaim.Value;
+        var query = new GetWebProjectsByProfileId.Query(_profileId);
+        Projects = (await Sender.Send(query)).ToList();
+      }
+    }
+
+    await base.OnInitializedAsync();
+  }
+
+  private bool _showCreateModal = false;
+  private string? ShowCreateModal => _showCreateModal ? "flex" : "none";
+
+  private void ToggleModal()
+  {
+    _showCreateModal = !_showCreateModal;
+  }
+
+  private string ProjectName { get; set; } = "";
+  private async Task Submit()
+  {
+    var command = new CreateWebProject.Command(ProjectName, _profileId!);
+    var project = await Sender.Send(command);
+
+    await JSRuntime.OpenInNewTabAsync($"/editor?projectId={project.Id}");
+    Projects!.Add(project);
+    //StateHasChanged();
+  }
+}
+

@@ -1,0 +1,49 @@
+@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+@import "theme.scss";
+
+html, body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  padding: 0px;
+  margin: 0px;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: $glaucous;
+  border-left: 1px solid $atomic-tangerine;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $cinereous;
+  border-radius: 4px;
+}
+
+#blazor-error-ui {
+  $padding: 12px;
+  padding: $padding;
+  height: calc(44px - (2 * $padding));
+  width: calc(100% - (2 * $padding));
+  background-color: #cf4040;
+  position: sticky;
+  margin-top: -44px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  display: none;
+
+  a:first-of-type {
+    flex: 1 0 auto;
+  }
+}
+
+.dismiss {
+  cursor: pointer;
+}

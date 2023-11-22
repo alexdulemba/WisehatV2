@@ -1,0 +1,144 @@
+﻿@page "/editor"
+@using Wisehat.Domain.Entities
+@using Wisehat.Domain.Queries.WebProjects
+@using MediatR
+@inject ISender Sender
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Editor</PageTitle>
+
+<div id="page-container">
+  <div id="widget-sidebar">
+    <div id="sidebar-title">Widgets</div>
+    <div id="widgets">
+      @foreach (var widget in Widgets)
+      {
+        <div class="widget-preview-container">
+          <h2>@widget.Type.ToString()</h2>
+          <div id="@(widget.Type.ToString())-widget" class="widget-preview" draggable="true">
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+  <div id="canvas" 
+    ondragover="handleCanvasDragOver(event)" 
+    ondrop="handleCanvasDrop(event)" >
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll(".widget-preview").forEach((element) => {
+    element.addEventListener("dragstart", handleWidgetDragStart);
+    element.addEventListener("dragover", handleWidgetDragOver);
+  });
+
+  function handleWidgetDragStart(e) {
+    console.log("started dragging fillbox");
+
+    e.dataTransfer.effectAllowed = "copy";
+    // e.dataTransfer.dropEffect = "copy";
+    e.dataTransfer.setData("data", e.target.id);
+
+    let elementRect = e.target.getBoundingClientRect();
+    e.dataTransfer.setData("grab-position-x", e.clientX - elementRect.left);
+    e.dataTransfer.setData("grab-position-y", e.clientY - elementRect.top);
+  }
+
+  function handleWidgetDragOver(e) {
+    e.preventDefault();
+    return false;
+  }
+
+  function handleCanvasDragOver(e) {
+    e.preventDefault();
+  }
+
+  function newHandleWidgetDragStart(e) {
+    console.log("started dragging dropped fillbox");
+
+    e.dataTransfer.effectAllowed = "move";
+    // e.dataTransfer.dropEffect = "move";
+    e.dataTransfer.setData("data", e.target.id);
+
+    let elementRect = e.target.getBoundingClientRect();
+    e.dataTransfer.setData("grab-position-x", e.clientX - elementRect.left);
+    e.dataTransfer.setData("grab-position-y", e.clientY - elementRect.top);
+  }
+
+  var copyCounter = 1;
+  function handleCanvasDrop(e) { 
+    e.stopPropagation();
+    console.log("something dropped");
+    console.log(e.dataTransfer);
+
+    if (e.dataTransfer.effectAllowed === "copy") {
+      let data = e.dataTransfer.getData("data");
+      let grabPositionX = e.dataTransfer.getData("grab-position-x");
+      let grabPositionY = e.dataTransfer.getData("grab-position-y");
+      let originalElement = document.getElementById(data);
+
+      let elementCopy = originalElement.cloneNode(true);
+      elementCopy.removeEventListener("dragstart", handleWidgetDragStart);
+      elementCopy.addEventListener("dragstart", newHandleWidgetDragStart, true);
+
+      let canvasRect = e.target.getBoundingClientRect();
+      elementCopy.id = `${elementCopy.id}-${copyCounter}`;
+      let originalStyles = window.getComputedStyle(originalElement);
+      let originalCssText = Object.values(originalStyles).reduce(
+        (css, propertyName) => {
+          if (propertyName === "position")
+            return `${css}position:absolute;`;
+          else if (propertyName === "top")
+            return `${css}top:${e.clientY - canvasRect.top - grabPositionY}px;`;
+          else if (propertyName === "left")
+            return `${css}left:${e.clientX - canvasRect.left - grabPositionX}px;`;
+          else
+            return `${css}${propertyName}:${originalStyles.getPropertyValue(propertyName)};`;
+        }
+      );
+      elementCopy.style.cssText = originalCssText;
+
+      e.target.appendChild(elementCopy);
+      copyCounter++;
+    } else {
+      let data = e.dataTransfer.getData("data");
+      let grabPositionX = e.dataTransfer.getData("grab-position-x");
+      let grabPositionY = e.dataTransfer.getData("grab-position-y");
+      let element = document.getElementById(data);
+      console.log(element);
+
+      element.style["inset"] = `${e.clientY - grabPositionY}px auto auto ${e.clientX - grabPositionX}px;`;
+    }
+    
+    return false;
+  }
+</script>
+
+@code {
+  [SupplyParameterFromQuery]
+  private Guid ProjectId { get; set; }
+
+  private WebProject? WebProject { get; set; }
+
+  protected override async Task OnInitializedAsync()
+  {
+    var query = new GetWebProject.Query(ProjectId);
+    WebProject = await Sender.Send(query);
+    
+    if (WebProject is null)
+      await JSRuntime.AlertAsync("Web Project data not found. Please close this tab and try again.");
+
+    await base.OnInitializedAsync();
+  }
+
+  private List<Widget> Widgets { get; set; } = new()
+  {
+    new FillBox(),
+    new TextBox(),
+    new ImageBox(),
+    new VideoBox()
+  };
+
+
+}
