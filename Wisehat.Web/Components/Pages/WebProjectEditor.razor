@@ -2,23 +2,42 @@
 @using Wisehat.Domain.Entities
 @using Wisehat.Domain.Queries.WebProjects
 @using MediatR
+@using Wisehat.Web.Components.Layout
 @inject ISender Sender
 @inject IJSRuntime JSRuntime
+@layout EditorLayout
 
-<PageTitle>Editor</PageTitle>
+<PageTitle>Page Editor</PageTitle>
 
 <div id="page-container">
+  <div id="widget-options-menu">
+    <div id="clear-canvas-btn" onclick="handleClearCanvas(event)">Clear Canvas</div>
+  </div>
   <div id="widget-sidebar">
     <div id="sidebar-title">Widgets</div>
     <div id="widgets">
-      @foreach (var widget in Widgets)
-      {
-        <div class="widget-preview-container">
-          <h2>@widget.Type.ToString()</h2>
-          <div id="@(widget.Type.ToString())-widget" class="widget-preview" draggable="true">
-          </div>
+      <div class="widget-preview-container">
+        <h2>Fill box</h2>
+        <div id="fillbox-widget" class="widget-preview" draggable="true">
         </div>
-      }
+      </div>
+      <div class="widget-preview-container">
+        <h2>Text box</h2>
+        <div id="textbox-widget" class="widget-preview" draggable="true">
+          <div>Sample Text</div>
+        </div>
+      </div>
+      <div class="widget-preview-container">
+        <h2>Image box</h2>
+        <div id="imagebox-widget" class="widget-preview" draggable="true">
+          <img src="sample-image.jpg"/>
+        </div>
+      </div>
+      <div class="widget-preview-container">
+        <h2>Video box</h2>
+        <div id="videobox-widget" class="widget-preview" draggable="true">
+        </div>
+      </div>      
     </div>
   </div>
   <div id="canvas" 
@@ -113,9 +132,18 @@
     
     return false;
   }
+
+  function handleClearCanvas(e) {
+    var canvas = document.querySelector("#canvas");
+    canvas.replaceChildren();
+    console.log("cleared canvas");
+  }
 </script>
 
 @code {
+  [CascadingParameter]
+  public EditorLayout? Layout { get; set; }
+
   [SupplyParameterFromQuery]
   private Guid ProjectId { get; set; }
 
@@ -125,9 +153,15 @@
   {
     var query = new GetWebProject.Query(ProjectId);
     WebProject = await Sender.Send(query);
-    
+
     if (WebProject is null)
       await JSRuntime.AlertAsync("Web Project data not found. Please close this tab and try again.");
+
+    if (WebProject is not null)
+    {
+      Layout!.Title = WebProject.Name;
+      Layout!.Update();
+    }
 
     await base.OnInitializedAsync();
   }

@@ -30,5 +30,9 @@
   {
     "outputFile": "Components/Pages/WebProjectEditor.razor.css",
     "inputFile": "Components/Pages/WebProjectEditor.razor.scss"
+  },
+  {
+    "outputFile": "Components/Layout/EditorLayout.razor.css",
+    "inputFile": "Components/Layout/EditorLayout.razor.scss"
   }
 ]

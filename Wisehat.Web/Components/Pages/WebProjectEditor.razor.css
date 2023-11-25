@@ -8,11 +8,30 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
+  flex-wrap: wrap;
+}
+#page-container > #widget-options-menu {
+  margin: 4px 4px 0px 4px;
+  width: 100%;
+  height: 40px;
+  background-color: rgb(168, 208, 219);
+  border-radius: 8px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+#page-container > #widget-options-menu > #clear-canvas-btn {
+  margin-right: 8px;
+  cursor: pointer;
+}
+#page-container > #widget-options-menu > #clear-canvas-btn:hover {
+  color: red;
+  font-weight: 600;
 }
 #page-container > #widget-sidebar {
-  margin: 4px 4px 4px 4px;
+  margin: 4px;
   width: 12%;
-  height: calc(100% - 8px);
+  height: calc(100% - 8px - 40px);
   background-color: rgb(168, 208, 219);
   border-radius: 8px;
   display: flex;
@@ -35,7 +54,7 @@
 }
 #page-container > #widget-sidebar > #widgets > .widget-preview-container {
   width: 96%;
-  height: 140px;
+  height: 144px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -45,22 +64,42 @@
   margin: 0px;
   width: 100%;
   text-align: center;
+  font-size: 1.4rem;
 }
 #page-container > #widget-sidebar > #widgets > .widget-preview-container > .widget-preview {
   width: 88%;
   height: 50%;
   border-radius: 4px;
   background-color: rgb(228, 146, 115);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 #page-container > #widget-sidebar > #widgets > .widget-preview-container > .widget-preview:hover {
   cursor: grab;
 }
+#page-container > #widget-sidebar > #widgets > .widget-preview-container > #fillbox-widget {
+  height: 44%;
+}
+#page-container > #widget-sidebar > #widgets > .widget-preview-container > #textbox-widget {
+  height: 44%;
+}
+#page-container > #widget-sidebar > #widgets > .widget-preview-container > #imagebox-widget {
+  height: 60%;
+}
+#page-container > #widget-sidebar > #widgets > .widget-preview-container > #imagebox-widget > img {
+  transform: scale(0.15);
+}
+#page-container > #widget-sidebar > #widgets > .widget-preview-container > #videobox-widget {
+  height: 60%;
+}
 #page-container > #canvas {
-  width: calc(88% - 8px);
-  height: calc(100% - 8px);
+  margin-right: 4px;
+  width: calc(88% - 12px);
+  height: calc(100% - 8px - 40px);
   border-radius: 8px;
   background-color: white;
-  background-size: calc((88% - 8px - 48px) / 26) calc((88% - 8px - 24px) / 16);
+  background-size: calc((88% - 12px - 48px) / 26) calc((88% - 12px - 24px) / 16);
   background-image: radial-gradient(circle, #000000 1px, rgba(0, 0, 0, 0) 1px);
   position: relative;
 }

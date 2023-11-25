@@ -1,0 +1,22 @@
+﻿@inherits LayoutComponentBase
+
+<CascadingValue Value="this">
+  <div id="page-container">
+    <header>
+      <a id="title" href="/">@Title</a>
+      <AccessControl />
+    </header>
+    <main>
+      @Body
+    </main>
+  </div>
+</CascadingValue>
+
+@code {
+  internal string Title { get; set; } = "Wisehat";
+
+  internal void Update()
+  {
+    StateHasChanged();
+  }
+}
