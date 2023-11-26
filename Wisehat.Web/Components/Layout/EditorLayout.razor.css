@@ -21,6 +21,26 @@
   font-size: 2rem;
   font-weight: 600;
   text-decoration: none;
+  width: 20%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+#page-container header > #title::placeholder {
+  color: rgb(43, 69, 112);
+}
+#page-container header > #title:hover {
+  border-bottom: 1px solid rgb(43, 69, 112);
+}
+#page-container header > #title:focus {
+  border: 1px solid rgb(43, 69, 112);
+}
+#page-container header > svg {
+  margin-left: 8px;
+  color: rgb(43, 69, 112);
+}
+#page-container header > svg:hover {
+  cursor: pointer;
 }
 #page-container main {
   background-color: rgb(43, 69, 112);

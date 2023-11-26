@@ -51,9 +51,16 @@
   color: rgb(113, 128, 172);
 }
 #project-listings > #project-listings-container > #project-listings-headers > p {
+  width: 33%;
   padding: 0px;
   margin: 0px;
   margin-bottom: 0.4rem;
+}
+#project-listings > #project-listings-container > #project-listings-headers > p:nth-of-type(2) {
+  text-align: center;
+}
+#project-listings > #project-listings-container > #project-listings-headers > p:last-of-type {
+  text-align: end;
 }
 #project-listings > #project-listings-container > #no-projects-message {
   margin-top: 16px;

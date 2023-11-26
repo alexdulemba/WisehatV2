@@ -3,6 +3,7 @@ using Microsoft.FeatureManagement;
 using Wisehat.Web.Components;
 using Wisehat.Domain.Web;
 using System.Diagnostics;
+using Wisehat.Web.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,5 +51,7 @@ app.UseAntiforgery();
 app.MapControllers();
 app.MapRazorComponents<App>()
   .AddInteractiveServerRenderMode();
+
+app.MapHub<WebProjectHub>("/webprojects");
 
 app.Run();

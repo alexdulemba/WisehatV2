@@ -19,6 +19,31 @@
       font-size: 2rem;
       font-weight: 600;
       text-decoration: none;
+      width: 20%;
+      background-color: transparent;
+      border: none;
+      outline: none;
+
+      &::placeholder {
+        color: $marian-blue;
+      }
+
+      &:hover {
+        border-bottom: 1px solid $marian-blue;
+      }
+
+      &:focus {
+        border: 1px solid $marian-blue;
+      }
+    }
+
+    > svg {
+      margin-left: 8px;
+      color: $marian-blue;
+
+      &:hover {
+        cursor: pointer;
+      }
     }
   }
 

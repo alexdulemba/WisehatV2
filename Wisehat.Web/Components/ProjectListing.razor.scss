@@ -16,19 +16,23 @@
   }
 
   > .project-listing-name {
+    width: 33%;
     font-size: 1.6rem;
     color: $light-blue;
   }
 
   > .project-listing-last-modified {
+    width: 34%;
+    text-align: center;
     font-size: 1.2rem;
     color: $light-blue;
   }
 
   > .project-listing-quick-controls {
+    width: 33%;
     height: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
 
     > p {

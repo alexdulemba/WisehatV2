@@ -15,10 +15,13 @@ public static class StartupExtensions
   {
     services.AddSingleton<IMongoClient>(_ =>
     {
+      var user = configuration["MongoDbAtlas:User"];
+      var password = configuration["MongoDbAtlas:Password"];
       var connectionString = configuration.GetConnectionString(MongoDatabaseService.Name)
         ?? throw new NullReferenceException($"{MongoDatabaseService.Name} connection string not found.");
 
-      return new MongoClient(MongoClientSettings.FromConnectionString(connectionString));
+      var filledConnectionString = connectionString.Replace("<user>", user).Replace("<password>", password);
+      return new MongoClient(MongoClientSettings.FromConnectionString(filledConnectionString));
     });
 
     services.AddScoped<IDatabaseService>(serviceProvider =>

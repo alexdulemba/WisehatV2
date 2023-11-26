@@ -52,6 +52,15 @@ public class MongoDatabaseService : IDatabaseService
     return result.IsAcknowledged;
   }
 
+  public async Task<bool> UpdateWebProjectTitleAsync(Guid projectId, string newTitle, CancellationToken token)
+  {
+    var filter = Builders<WebProject>.Filter.Eq(wp => wp.Id, projectId);
+    var update = Builders<WebProject>.Update.Set(wp => wp.Name, newTitle);
+
+    var result = await _webProjects.UpdateOneAsync(filter, update, cancellationToken: token);
+    return result.IsAcknowledged;
+  }
+
   public async Task<bool> DeleteWebProjectAsync(Guid projectId, CancellationToken token)
   {
     var result = await _webProjects.DeleteOneAsync(p => p.Id == projectId, token);

@@ -1,9 +1,15 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Diagnostics
+@using Wisehat.Domain.Commands.WebProjects
+@using MediatR
+@inject ISender Sender
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.SignalR.Client
+@inherits LayoutComponentBase
 
 <CascadingValue Value="this">
   <div id="page-container">
     <header>
-      <a id="title" href="/">@Title</a>
+      <SectionOutlet SectionName="project-title" />
       <AccessControl />
     </header>
     <main>
@@ -15,8 +21,7 @@
 @code {
   internal string Title { get; set; } = "Wisehat";
 
-  internal void Update()
-  {
-    StateHasChanged();
-  }
+  internal Guid ProjectId { get; set; }
+
+  private string? CurrentTitle { get; set; }
 }

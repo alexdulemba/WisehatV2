@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>a70e50c4-d73f-47e0-9775-c9dc2ff69d74</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,7 @@
   <ItemGroup>
     <PackageReference Include="Auth0.AspNetCore.Authentication" Version="1.3.1" />
     <PackageReference Include="FluentValidation" Version="11.8.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="3.0.0" />
     <PackageReference Include="Microsoft.Identity.Web.UI" Version="2.15.5" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />

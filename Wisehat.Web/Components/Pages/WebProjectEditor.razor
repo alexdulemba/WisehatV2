@@ -1,13 +1,22 @@
 ﻿@page "/editor"
+@using Microsoft.AspNetCore.SignalR.Client
+@using System.Diagnostics
+@using Wisehat.Domain.Commands.WebProjects
 @using Wisehat.Domain.Entities
 @using Wisehat.Domain.Queries.WebProjects
 @using MediatR
 @using Wisehat.Web.Components.Layout
 @inject ISender Sender
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 @layout EditorLayout
+@implements IAsyncDisposable
 
 <PageTitle>Page Editor</PageTitle>
+
+<SectionContent SectionName="project-title">
+  <input type="text" placeholder="@PreviousTitle" id="title" @bind-value="@NewTitle" @onfocusout="HandleTitleChange" />
+</SectionContent>
 
 <div id="page-container">
   <div id="widget-options-menu">
@@ -141,13 +150,16 @@
 </script>
 
 @code {
-  [CascadingParameter]
-  public EditorLayout? Layout { get; set; }
-
   [SupplyParameterFromQuery]
   private Guid ProjectId { get; set; }
 
   private WebProject? WebProject { get; set; }
+  private string? PreviousTitle { get; set; }
+  private string? NewTitle { get; set; }
+
+  private int TabId { get; set; } = new Random().Next();
+
+  private HubConnection? _hubConnection;
 
   protected override async Task OnInitializedAsync()
   {
@@ -155,24 +167,46 @@
     WebProject = await Sender.Send(query);
 
     if (WebProject is null)
-      await JSRuntime.AlertAsync("Web Project data not found. Please close this tab and try again.");
-
-    if (WebProject is not null)
     {
-      Layout!.Title = WebProject.Name;
-      Layout!.Update();
+      await JSRuntime.AlertAsync("Web Project data not found. Please close this tab and try again.");
+      return;
     }
+    PreviousTitle = WebProject.Name;
 
-    await base.OnInitializedAsync();
+    _hubConnection = new HubConnectionBuilder()
+        .WithUrl(NavigationManager.ToAbsoluteUri("/webprojects"))
+        .Build();
+
+    _hubConnection.On<Guid, string>("UpdateWebProjectTitle", (projectId, newTitle) =>
+    {
+      Debug.WriteLine($"new title incoming in tab {TabId}...");
+      if (projectId == this.ProjectId)
+      {
+        PreviousTitle = newTitle;
+        InvokeAsync(StateHasChanged);
+      }
+    });
+
+    await _hubConnection.StartAsync();
+    await _hubConnection.SendAsync("JoinWebProjectGroup", ProjectId);
+    Debug.WriteLine($"Tab {TabId} created");
   }
 
-  private List<Widget> Widgets { get; set; } = new()
+  internal async Task HandleTitleChange(FocusEventArgs args)
   {
-    new FillBox(),
-    new TextBox(),
-    new ImageBox(),
-    new VideoBox()
-  };
+    if (!string.IsNullOrEmpty(NewTitle))
+    {
+      var command = new UpdateWebProjectTitle.Command(ProjectId, NewTitle);
+      var success = await Sender.Send(command);
 
+      if (_hubConnection is not null && success is true)
+        await _hubConnection.SendAsync("UpdateWebProjectTitle", ProjectId, NewTitle);
+    }
+  }
 
+  public async ValueTask DisposeAsync()
+  {
+    if (_hubConnection is not null)
+      await _hubConnection.DisposeAsync();
+  }
 }
