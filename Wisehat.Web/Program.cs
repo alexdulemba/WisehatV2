@@ -25,9 +25,7 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     ?? throw new NullReferenceException("Auth0 ClientId not provided");
 });
 
-//builder.WebHost.UseStaticWebAssets();
-var services = builder.Services.Select(s => s.ServiceType.Name).ToArray();
-Debug.WriteLine(services);
+//builder.WebHost.UseStaticWebAssets(); 
 
 var app = builder.Build();
 

@@ -38,8 +38,19 @@
   background-color: rgb(168, 208, 219);
   border-radius: 8px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
+}
+#page-container > #widget-options-menu > #save-btn {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 8px;
+  cursor: pointer;
+}
+#page-container > #widget-options-menu > #save-btn > svg {
+  fill: rgb(43, 69, 112);
 }
 #page-container > #widget-options-menu > #clear-canvas-btn {
   margin-right: 8px;

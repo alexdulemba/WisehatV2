@@ -23,6 +23,11 @@ public class WebProjectHub : Hub<WebProjectCommands>
     await Clients.OthersInGroup(projectId.ToString())
       .UpdateWebProjectTitle(projectId, newProjectTitle);
   }
+
+  public void ServerReceiveWidgets(object[] widgets)
+  {
+    Debug.WriteLine(widgets); 
+  }
 }
 
 public interface WebProjectCommands

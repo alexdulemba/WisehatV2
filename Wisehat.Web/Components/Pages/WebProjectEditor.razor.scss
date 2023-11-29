@@ -39,8 +39,21 @@
     background-color: $light-blue;
     border-radius: 8px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
+
+    > #save-btn {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-left: 8px;
+      cursor: pointer;
+
+      > svg {
+        fill: $marian-blue;
+      }
+    }
 
     > #clear-canvas-btn {
       margin-right: 8px;
