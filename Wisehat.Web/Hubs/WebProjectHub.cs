@@ -26,7 +26,7 @@ public class WebProjectHub : Hub<WebProjectCommands>
 
   public void ServerReceiveWidgets(object[] widgets)
   {
-    Debug.WriteLine(widgets); 
+    Debug.WriteLine(widgets[0]); 
   }
 }
 

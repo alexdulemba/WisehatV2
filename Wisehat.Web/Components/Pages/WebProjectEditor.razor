@@ -26,7 +26,7 @@
         <path d="M840-680v480q0 33-23.5 56.5T760-120H200q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h480l160 160Zm-80 34L646-760H200v560h560v-446ZM480-240q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35ZM240-560h360v-160H240v160Zm-40-86v446-560 114Z" />
       </svg>
     </div>
-    <div id="clear-canvas-btn" onclick="handleClearCanvas(event)">
+    <div id="clear-canvas-btn">
       Clear Canvas
     </div>
   </div>
@@ -35,45 +35,82 @@
     <div id="widgets">
       <div class="widget-preview-container">
         <h2>Fill box</h2>
-        <div id="fillbox-widget" class="widget-preview" draggable="true">
+        <div id="fillbox-widget" class="widget-preview" draggable="true" data-widget-type="fillbox">
         </div>
       </div>
       <div class="widget-preview-container">
         <h2>Text box</h2>
-        <div id="textbox-widget" class="widget-preview" draggable="true">
+        <div id="textbox-widget" class="widget-preview" draggable="true" data-widget-type="textbox">
           <div>Sample Text</div>
         </div>
       </div>
       <div class="widget-preview-container">
         <h2>Image box</h2>
-        <div id="imagebox-widget" class="widget-preview" draggable="true">
+        <div id="imagebox-widget" class="widget-preview" draggable="true" data-widget-type="imagebox">
           <img src="sample-image.jpg"/>
         </div>
       </div>
       <div class="widget-preview-container">
         <h2>Video box</h2>
-        <div id="videobox-widget" class="widget-preview" draggable="true">
+        <div id="videobox-widget" class="widget-preview" draggable="true" data-widget-type="videobox">
         </div>
       </div>      
     </div>
   </div>
-  <div id="canvas" 
-    ondragover="handleCanvasDragOver(event)" 
-    ondrop="handleCanvasDrop(event)" >
+  <div id="canvas">
   </div>
 </div>
 
-<script>
+<script src="/js/signalr/dist/browser/signalr.min.js"></script>
+<script src="/js/editor.js"></script>
+<script type="module">
+  import { Widget } from './js/widget.js';
+  import { createElementFromWidget } from './js/widgetHelper.js';
+  import { v4 as uuid } from 'https://jspm.dev/uuid';
+
   document.querySelectorAll(".widget-preview").forEach((element) => {
-    element.addEventListener("dragstart", handleWidgetDragStart);
+    element.addEventListener("dragstart", (event) => {
+      let widgetType = element.dataset.widgetType;
+      console.log(`started dragging ${widgetType}`);
+
+      let elementRect = event.target.getBoundingClientRect();
+      let widget = new Widget(
+        uuid(),
+        null,
+        widgetType,
+        [event.clientX - elementRect.left, event.clientY - elementRect.top],
+        [150, 70],
+        element.innerHTML,
+        element.style.backgroundColor,
+        element.style.borderColor,
+        null
+      );
+
+      event.dataTransfer.effectAllowed = "copy";
+      event.dataTransfer.setData("widgetData", JSON.stringify(widget));
+    });
     element.addEventListener("dragover", handleWidgetDragOver);
   });
+
+  let canvas = document.getElementById("canvas");
+  canvas.addEventListener("dragover", handleCanvasDragOver);
+  canvas.addEventListener("drop", handleCanvasDrop);
 
   function handleWidgetDragStart(e) {
     console.log("started dragging fillbox");
 
     e.dataTransfer.effectAllowed = "copy";
-    // e.dataTransfer.dropEffect = "copy";
+    e.dataTransfer.setData("data", e.target.id);
+
+    let elementRect = e.target.getBoundingClientRect();
+    e.dataTransfer.setData("grab-position-x", e.clientX - elementRect.left);
+    e.dataTransfer.setData("grab-position-y", e.clientY - elementRect.top);
+  }
+
+  function newHandleWidgetDragStart(e) {
+    console.log("started dragging dropped fillbox");
+
+    e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("data", e.target.id);
 
     let elementRect = e.target.getBoundingClientRect();
@@ -88,76 +125,34 @@
 
   function handleCanvasDragOver(e) {
     e.preventDefault();
+    return false;
   }
 
-  function newHandleWidgetDragStart(e) {
-    console.log("started dragging dropped fillbox");
-
-    e.dataTransfer.effectAllowed = "move";
-    // e.dataTransfer.dropEffect = "move";
-    e.dataTransfer.setData("data", e.target.id);
-
-    let elementRect = e.target.getBoundingClientRect();
-    e.dataTransfer.setData("grab-position-x", e.clientX - elementRect.left);
-    e.dataTransfer.setData("grab-position-y", e.clientY - elementRect.top);
-  }
-
-  var copyCounter = 1;
   function handleCanvasDrop(e) { 
     e.stopPropagation();
-    console.log("something dropped");
-    console.log(e.dataTransfer);
 
     if (e.dataTransfer.effectAllowed === "copy") {
-      let data = e.dataTransfer.getData("data");
-      let grabPositionX = e.dataTransfer.getData("grab-position-x");
-      let grabPositionY = e.dataTransfer.getData("grab-position-y");
-      let originalElement = document.getElementById(data);
+      let widgetData = JSON.parse(e.dataTransfer.getData("widgetData"));
+      console.log(`${widgetData.widgetType} dropped on canvas`);
 
-      let elementCopy = originalElement.cloneNode(true);
-      elementCopy.removeEventListener("dragstart", handleWidgetDragStart);
-      elementCopy.addEventListener("dragstart", newHandleWidgetDragStart, true);
-
-      let canvasRect = e.target.getBoundingClientRect();
-      elementCopy.id = `${elementCopy.id}-${copyCounter}`;
-      let originalStyles = window.getComputedStyle(originalElement);
-      let originalCssText = Object.values(originalStyles).reduce(
-        (css, propertyName) => {
-          if (propertyName === "position")
-            return `${css}position:absolute;`;
-          else if (propertyName === "top")
-            return `${css}top:${e.clientY - canvasRect.top - grabPositionY}px;`;
-          else if (propertyName === "left")
-            return `${css}left:${e.clientX - canvasRect.left - grabPositionX}px;`;
-          else
-            return `${css}${propertyName}:${originalStyles.getPropertyValue(propertyName)};`;
-        }
-      );
-      elementCopy.style.cssText = originalCssText;
-
-      e.target.appendChild(elementCopy);
-      copyCounter++;
+      let newElement = createElementFromWidget(widgetData, e, newHandleWidgetDragStart);
+      e.target.appendChild(newElement);
     } else {
       console.log("started dragging element on canvas");
-      let data = e.dataTransfer.getData("data");
-      let grabPositionX = e.dataTransfer.getData("grab-position-x");
-      let grabPositionY = e.dataTransfer.getData("grab-position-y");
-      let element = document.getElementById(data);
-
-      element.style["inset"] = `${e.clientY - grabPositionY}px auto auto ${e.clientX - grabPositionX}px;`;
+      let widgetData = e.dataTransfer.getData("widgetData");
     }
     
     return false;
   }
 
+  document.getElementById("clear-canvas-btn").addEventListener("click", handleClearCanvas);
   function handleClearCanvas(e) {
     var canvas = document.querySelector("#canvas");
     canvas.replaceChildren();
     console.log("cleared canvas");
   }
 </script>
-<script src="/js/signalr/dist/browser/signalr.min.js"></script>
-<script src="/js/editor.js"></script>
+
 
 @code {
   [SupplyParameterFromQuery]
@@ -216,8 +211,7 @@
 
   internal async Task HandleCanvasDrop(MouseEventArgs args)
   {
-    var children = await JSRuntime.GetChildrenOfElementAsync("canvas");
-    Debug.WriteLine(children);
+
   }
 
   public async ValueTask DisposeAsync()

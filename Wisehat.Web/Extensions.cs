@@ -18,9 +18,4 @@ public static class Extensions
   {
     return jsRuntime.InvokeAsync<bool>("confirm", message);
   }
-
-  internal static ValueTask<object> GetChildrenOfElementAsync(this IJSRuntime jsRuntime, string parent)
-  {
-    return jsRuntime.InvokeAsync<object>("document.getElementById", parent);
-  }
 }
