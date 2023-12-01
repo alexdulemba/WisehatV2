@@ -15,7 +15,7 @@ public class WebProject
 
   public string? Description { get; set; }
 
-  public List<Widget>? Widgets { get; set; }
+  public List<Widget> Widgets { get; set; } = [];
 
   public DateTime CreatedOn { get; set; }
 

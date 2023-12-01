@@ -11,12 +11,11 @@ namespace Wisehat.Domain.Entities
       if (reader.TokenType != JsonTokenType.StartObject)
         throw new JsonException();
 
-      var propDict = new Dictionary<string, float>();
-
+      var vectorProperties = new Dictionary<string, float>();
       while (reader.Read())
       {
         if (reader.TokenType == JsonTokenType.EndObject)
-          return BuildVector2(propDict);
+          return BuildVector2(vectorProperties);
 
         if (reader.TokenType != JsonTokenType.PropertyName)
           throw new JsonException();
@@ -24,13 +23,13 @@ namespace Wisehat.Domain.Entities
         var propertyName = reader.GetString()?.ToLower() ?? throw new JsonException();
         reader.Read();
         var value = reader.GetSingle();
-        propDict.Add(propertyName, value);
+        vectorProperties.Add(propertyName, value);
       }
 
       throw new JsonException();
     }
 
-    private Vector2 BuildVector2(Dictionary<string, float> properties)
+    private static Vector2 BuildVector2(Dictionary<string, float> properties)
     {
       if (properties.TryGetValue("x", out var x) && properties.TryGetValue("y", out var y))
       {

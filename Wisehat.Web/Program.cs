@@ -2,13 +2,15 @@ using Auth0.AspNetCore.Authentication;
 using Microsoft.FeatureManagement;
 using Wisehat.Web.Components;
 using Wisehat.Domain.Web;
-using System.Diagnostics;
 using Wisehat.Web.Hubs;
+using Wisehat.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddDomainValidators();
+
+builder.Services.AddSingleton<WidgetBucketService>();
 
 builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents()

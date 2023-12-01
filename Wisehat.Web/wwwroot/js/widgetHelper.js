@@ -1,19 +1,5 @@
 import { Widget } from './widget.js';
 
-//> .widget-preview {
-//  width: 88%;
-//  height: 50%;
-//  border-radius: 4px;
-//  background-color: $atomic-tangerine;
-//  display: flex;
-//  justify-content: center;
-//  align-items: center;
-
-//  &:hover {
-//    cursor: grab;
-//  }
-//}
-
 export class Theme {
   static glaucousHEX = '#7180acff';
   static marianBlueHEX = '#2b4570ff';
@@ -48,10 +34,10 @@ export class Theme {
 export function createElementFromWidget(widget, event, onDragStart) {
   let newElement = document.createElement("div");
   let canvasRect = document.getElementById("canvas").getBoundingClientRect();
-  let newPositionX = event.clientX - canvasRect.left - widget.grabPosition[0];
-  let newPositionY = event.clientY - canvasRect.top - widget.grabPosition[1];
-  widget.location = [newPositionX, newPositionY];
-  newElement.dataset.relativeLocation = widget.location;
+  let newPositionX = event.clientX - canvasRect.left - widget.grabPosition.x;
+  let newPositionY = event.clientY - canvasRect.top - widget.grabPosition.y;
+  widget.position = { "x": newPositionX, "y": newPositionY };
+/*  newElement.dataset.relativeLocation = widget.position;*/
 
   newElement.style.width = "150px";
   newElement.style.height = "70px";

@@ -24,6 +24,8 @@ public class MongoDatabaseService : IDatabaseService
 
   public async Task<IEnumerable<WebProject>> GetWebProjectsByProfileIdAsync(string profileId, CancellationToken token)
   {
+    _logger.LogInformation("Getting web projects for profile {profileId}", profileId);
+
     return await _webProjects.AsQueryable()
       .Where(p => p.ProfileId == profileId)
       .ToListAsync(token);
@@ -31,6 +33,8 @@ public class MongoDatabaseService : IDatabaseService
 
   public async Task<WebProject?> GetWebProjectAsync(Guid projectId, CancellationToken token)
   {
+    _logger.LogInformation("Getting web project {projectId}", projectId);
+
     return await _webProjects.AsQueryable()
       .Where(p => p.Id == projectId)
       .FirstOrDefaultAsync(token);
@@ -38,15 +42,19 @@ public class MongoDatabaseService : IDatabaseService
 
   public async Task CreateWebProjectAsync(WebProject project, CancellationToken token)
   {
+    _logger.LogInformation("Creating new web project {projectId}", project.Id);
+
     await _webProjects.InsertOneAsync(project, null, token);
   }
 
-  public async Task<bool> UpdateWebProjectAsync(WebProject webProject, CancellationToken token)
+  public async Task<bool> UpdateWebProjectAsync(WebProject project, CancellationToken token)
   {
+    _logger.LogInformation("Updating new web project {projectId}", project.Id);
+
     //var options = new ReplaceOptions() { IsUpsert = true };
     var result = await _webProjects.ReplaceOneAsync(
-      p => p.Id == webProject.Id, 
-      webProject, 
+      p => p.Id == project.Id, 
+      project, 
       cancellationToken: token);
 
     return result.IsAcknowledged;
@@ -54,6 +62,8 @@ public class MongoDatabaseService : IDatabaseService
 
   public async Task<bool> UpdateWebProjectTitleAsync(Guid projectId, string newTitle, CancellationToken token)
   {
+    _logger.LogInformation("Updating web project {projectId} title to {newTitle}", projectId, newTitle);
+
     var filter = Builders<WebProject>.Filter.Eq(wp => wp.Id, projectId);
     var update = Builders<WebProject>.Update.Set(wp => wp.Name, newTitle);
 
@@ -61,8 +71,21 @@ public class MongoDatabaseService : IDatabaseService
     return result.IsAcknowledged;
   }
 
+  public async Task<bool> UpdateWebProjectWidgetsAsync(Guid projectId, List<Widget> widgets, CancellationToken token)
+  {
+    _logger.LogInformation("Updating widgets for project {projectId}", projectId);
+
+    var filter = Builders<WebProject>.Filter.Eq(wp => wp.Id, projectId);
+    var update = Builders<WebProject>.Update.Set(wp => wp.Widgets, widgets);
+
+    var result = await _webProjects.UpdateOneAsync(filter, update, cancellationToken: token);
+    return result.IsAcknowledged;
+  }
+
   public async Task<bool> DeleteWebProjectAsync(Guid projectId, CancellationToken token)
   {
+    _logger.LogInformation("Deleting web project {projectId}", projectId);
+
     var result = await _webProjects.DeleteOneAsync(p => p.Id == projectId, token);
     return result.IsAcknowledged;
   }

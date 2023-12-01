@@ -7,9 +7,12 @@
 @using Wisehat.Domain.Queries.WebProjects
 @using MediatR
 @using Wisehat.Web.Components.Layout
+@using Wisehat.Web.Hubs
+@using Wisehat.Web.Services
 @inject ISender Sender
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
+@inject WidgetBucketService WBS
 @layout EditorLayout
 @implements IAsyncDisposable
 
@@ -21,7 +24,7 @@
 
 <div id="page-container">
   <div id="widget-options-menu">
-    <div id="save-btn">
+    <div id="save-btn" @onclick="HandleSave">
       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
         <path d="M840-680v480q0 33-23.5 56.5T760-120H200q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h480l160 160Zm-80 34L646-760H200v560h560v-446ZM480-240q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35ZM240-560h360v-160H240v160Zm-40-86v446-560 114Z" />
       </svg>
@@ -58,6 +61,30 @@
     </div>
   </div>
   <div id="canvas">
+    @if (WebProject is not null && WebProject.Widgets.Count > 0)
+    {
+      @foreach (var widget in WebProject.Widgets)
+      {
+        <div id="@($"{widget.Type}_{widget.Id}")" 
+             style="position: absolute; 
+                    top: @(widget.Position.Y)px;
+                    left: @(widget.Position.X)px;
+                    width: @(widget.Size.X)px;
+                    height: @(widget.Size.Y)px;
+                    border-radius: 4px;
+                    border-color: @widget.BorderColor;
+                    background-color: @(string.IsNullOrEmpty(widget.BackgroundColor) ? "#e49273ff" : widget.BackgroundColor);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    cursor: grab;
+                    resize: both;"
+             draggable="true" 
+             title="@widget.Description">
+          @widget.Content
+        </div>
+      }
+    }
   </div>
 </div>
 
@@ -67,6 +94,9 @@
   import { Widget } from './js/widget.js';
   import { createElementFromWidget } from './js/widgetHelper.js';
   import { v4 as uuid } from 'https://jspm.dev/uuid';
+
+  let urlParams = new URLSearchParams(window.location.search);
+  let projectId = urlParams.get("projectId");
 
   document.querySelectorAll(".widget-preview").forEach((element) => {
     element.addEventListener("dragstart", (event) => {
@@ -78,8 +108,8 @@
         uuid(),
         null,
         widgetType,
-        [event.clientX - elementRect.left, event.clientY - elementRect.top],
-        [150, 70],
+        { "x": event.clientX - elementRect.left, "y": event.clientY - elementRect.top },
+        { "x": 150, "y": 70 },
         element.innerHTML,
         element.style.backgroundColor,
         element.style.borderColor,
@@ -133,9 +163,16 @@
 
     if (e.dataTransfer.effectAllowed === "copy") {
       let widgetData = JSON.parse(e.dataTransfer.getData("widgetData"));
-      console.log(`${widgetData.widgetType} dropped on canvas`);
+      console.log(`${widgetData.type} dropped on canvas`);
 
       let newElement = createElementFromWidget(widgetData, e, newHandleWidgetDragStart);
+
+      if (connection != null) {
+        connection.invoke("ServerReceiveWidget", widgetData, projectId).catch((err) => {
+          return console.error(err.toString());
+        });
+      }
+
       e.target.appendChild(newElement);
     } else {
       console.log("started dragging element on canvas");
@@ -162,12 +199,12 @@
   private string? PreviousTitle { get; set; }
   private string? NewTitle { get; set; }
 
-  private int TabId { get; set; } = new Random().Next();
-
   private HubConnection? _hubConnection;
 
   protected override async Task OnInitializedAsync()
   {
+    WBS.RemoveAllWidgetsForProject(ProjectId);
+
     var query = new GetWebProject.Query(ProjectId);
     WebProject = await Sender.Send(query);
 
@@ -184,7 +221,6 @@
 
     _hubConnection.On<Guid, string>("UpdateWebProjectTitle", (projectId, newTitle) =>
     {
-      Debug.WriteLine($"new title incoming in tab {TabId}...");
       if (projectId == this.ProjectId)
       {
         PreviousTitle = newTitle;
@@ -194,7 +230,7 @@
 
     await _hubConnection.StartAsync();
     await _hubConnection.SendAsync("JoinWebProjectGroup", ProjectId);
-    Debug.WriteLine($"Tab {TabId} created");
+    Debug.WriteLine($"Widget count: {WebProject.Widgets.Count}");
   }
 
   internal async Task HandleTitleChange(FocusEventArgs args)
@@ -209,9 +245,10 @@
     }
   }
 
-  internal async Task HandleCanvasDrop(MouseEventArgs args)
+  internal async Task HandleSave()
   {
-
+    if (_hubConnection is not null)
+      await _hubConnection.SendAsync(nameof(WebProjectHub.SaveWebProjectAsync), ProjectId);
   }
 
   public async ValueTask DisposeAsync()

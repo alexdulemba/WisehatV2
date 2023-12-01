@@ -14,5 +14,7 @@ public interface IDatabaseService
 
   Task<bool> UpdateWebProjectTitleAsync(Guid projectId, string newTitle, CancellationToken token);
 
+  Task<bool> UpdateWebProjectWidgetsAsync(Guid projectId, List<Widget> widgets, CancellationToken token);
+
   Task<bool> DeleteWebProjectAsync(Guid projectId, CancellationToken token);
 }

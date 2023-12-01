@@ -1,32 +1,61 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using System.Diagnostics;
+using Wisehat.Domain.Commands.WebProjects;
+using Wisehat.Domain.Entities;
+using Wisehat.Web.Services;
 
 namespace Wisehat.Web.Hubs;
 
 public class WebProjectHub : Hub<WebProjectCommands>
 {
+  private readonly WidgetBucketService _widgetBucketService;
+  private readonly ISender _sender;
+  private readonly ILogger<WebProjectHub> _logger;
+
+  public WebProjectHub(WidgetBucketService widgetBucketService, ISender sender, ILogger<WebProjectHub> logger)
+  {
+    _widgetBucketService = widgetBucketService;
+    _sender = sender;
+    _logger = logger;
+  }
+
   public async Task JoinWebProjectGroup(Guid projectId)
   {
     await Groups.AddToGroupAsync(Context.ConnectionId, projectId.ToString());
-    Debug.WriteLine($"new connection {Context.ConnectionId} added to group {projectId}");
+    _logger.LogInformation("New connection {connectionId} added to group {groupId}", Context.ConnectionId, projectId);
   }
 
   public async Task LeaveWebProjectGroup(Guid projectId)
   {
     await Groups.RemoveFromGroupAsync(Context.ConnectionId, projectId.ToString());
-    Debug.WriteLine($"removed connection from group");
+    _logger.LogInformation("Removed connection from {groupId}", projectId);
   }
 
   public async Task UpdateWebProjectTitle(Guid projectId, string newProjectTitle)
   {
-    Debug.WriteLine($@"project title updated to ""{newProjectTitle}"", sending new info to other open editors...");
+    _logger.LogInformation("Project {projectId} title updated to {newProjectTitle}, sending new info to other open editors...", projectId, newProjectTitle);
     await Clients.OthersInGroup(projectId.ToString())
       .UpdateWebProjectTitle(projectId, newProjectTitle);
   }
 
-  public void ServerReceiveWidgets(object[] widgets)
+  public void ServerReceiveWidgets(Widget[] widgets)
   {
-    Debug.WriteLine(widgets[0]); 
+    Debug.WriteLine(widgets); 
+  }
+
+  public void ServerReceiveWidget(Widget widget, Guid projectId)
+  {
+    _logger.LogInformation("Received widget {widgetId} for project {projectId}", widget.Id, projectId);
+    _widgetBucketService.AddWidget(projectId, widget);
+  }
+
+  public async Task SaveWebProjectAsync(Guid projectId)
+  {
+    var widgets = _widgetBucketService.GetWidgetsByProject(projectId);
+    var command = new UpdateWebProjectWidgets.Command(projectId, widgets);
+    var success = await _sender.Send(command);
+    _logger.LogInformation("Widgets data {result}", success ? "saved successfully" : "failed to save");
   }
 }
 
