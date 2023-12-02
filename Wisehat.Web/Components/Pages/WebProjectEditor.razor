@@ -255,5 +255,7 @@
   {
     if (_hubConnection is not null)
       await _hubConnection.DisposeAsync();
+
+    WBS.RemoveAllWidgetsForProject(ProjectId);
   }
 }

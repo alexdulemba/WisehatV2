@@ -12,8 +12,9 @@
   align-items: center;
 }
 #landing-container h1 {
-  flex: 1 0 auto;
+  /*flex: 1 0 auto;*/
   color: rgb(168, 208, 219);
+  font-size: 2.8rem;
 }
 #landing-container p {
   font-weight: 600;

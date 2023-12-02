@@ -37,7 +37,6 @@ export function createElementFromWidget(widget, event, onDragStart) {
   let newPositionX = event.clientX - canvasRect.left - widget.grabPosition.x;
   let newPositionY = event.clientY - canvasRect.top - widget.grabPosition.y;
   widget.position = { "x": newPositionX, "y": newPositionY };
-/*  newElement.dataset.relativeLocation = widget.position;*/
 
   newElement.style.width = "150px";
   newElement.style.height = "70px";

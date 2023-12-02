@@ -34,5 +34,9 @@
   {
     "outputFile": "Components/Layout/EditorLayout.razor.css",
     "inputFile": "Components/Layout/EditorLayout.razor.scss"
+  },
+  {
+    "outputFile": "Components/Pages/PrivacyPolicy.razor.css",
+    "inputFile": "Components/Pages/PrivacyPolicy.razor.scss"
   }
 ]

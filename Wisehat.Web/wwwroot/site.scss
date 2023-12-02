@@ -13,16 +13,17 @@ body {
 
 ::-webkit-scrollbar {
   width: 12px;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-track {
   background: $glaucous;
-  border-left: 1px solid $atomic-tangerine;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: $cinereous;
-  border-radius: 4px;
+  background: $marian-blue;
+  border-radius: 6px;
+  border: 1px solid $atomic-tangerine;
 }
 
 #blazor-error-ui {

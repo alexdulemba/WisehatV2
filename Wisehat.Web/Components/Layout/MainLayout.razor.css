@@ -27,9 +27,23 @@
   height: 743px;
 }
 #page-container footer {
-  min-height: 104px;
+  font-family: inherit;
+  min-height: 124px;
   background-color: rgb(168, 208, 219);
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+}
+#page-container footer > span {
+  color: rgb(113, 128, 172);
+  font-size: 1.6rem;
+  margin-bottom: 8px;
+}
+#page-container footer > span:last-of-type {
+  font-size: 0.8rem;
+}
+#page-container footer > a {
+  text-decoration: none;
+  font-size: 0.8rem;
 }
