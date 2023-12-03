@@ -41,7 +41,8 @@ export function createElementFromWidget(widgetData, event) {
   newElement.style.width = "150px";
   newElement.style.height = "70px";
   newElement.style.borderRadius = "4px";
-  newElement.style.backgroundColor = Theme.atomicTangerineHEX;
+  newElement.style.backgroundColor = widgetData.backgroundColor;
+  newElement.style.borderColor = widgetData.borderColor;
   newElement.style.display = "flex";
   newElement.style.justifyContent = "center";
   newElement.style.alignItems = "center";
@@ -51,6 +52,7 @@ export function createElementFromWidget(widgetData, event) {
   newElement.draggable = true;
 
   newElement.dataset.widgetType = widgetData.type;
+  newElement.innerHTML = widgetData.content;
   newElement.id = `${widgetData.type}_${widgetData.id}`;
   newElement.style.position = "absolute";
   newElement.style.top = `${newPositionY}px`;

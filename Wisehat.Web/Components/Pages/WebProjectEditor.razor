@@ -56,6 +56,8 @@
       <div class="widget-preview-container">
         <h2>Video box</h2>
         <div id="videobox-widget" class="widget-preview" draggable="true" data-widget-type="videobox">
+          <iframe width="150" height="80" src="https://youtu.be/dQw4w9WgXcQ?si=yU6qF0_BJpAY01d9" longdesc="Youtube Video">
+          </iframe>
         </div>
       </div>      
     </div>
@@ -101,7 +103,7 @@
   document.querySelectorAll(".widget-preview").forEach((element) => {
     element.addEventListener("dragstart", (event) => {
       let widgetType = element.dataset.widgetType;
-      console.log(`started dragging ${widgetType}`);
+      let styles = element.computedStyleMap();
 
       let elementRect = event.target.getBoundingClientRect();
       let widget = new Widget(
@@ -111,8 +113,8 @@
         { "x": event.clientX - elementRect.left, "y": event.clientY - elementRect.top },
         { "x": 150, "y": 70 },
         element.innerHTML,
-        element.style.backgroundColor,
-        element.style.borderColor,
+        styles.get("background-color").toString(),
+        styles.get("border-color").toString(),
         null
       );
 
@@ -148,6 +150,7 @@
 
     if (e.dataTransfer.effectAllowed === "copy") {
       let widgetData = JSON.parse(e.dataTransfer.getData("widgetData"));
+      console.log(widgetData);
 
       let newElement = createElementFromWidget(widgetData, e);
 
@@ -179,7 +182,6 @@
   canvas.addEventListener("click", (e) => {
     if (e.target.id === canvas.id) { 
       let currentWidgets = [...canvas.children];
-      console.log(currentWidgets);
       let currentlyFocusedWidgets = currentWidgets.filter(w => w.getAttribute("data-is-selected") === "true");
       currentlyFocusedWidgets.forEach(w => {
         w.setAttribute("data-is-selected", "false");
@@ -192,7 +194,6 @@
   function handleClearCanvas(e) {
     var canvas = document.querySelector("#canvas");
     canvas.replaceChildren();
-    console.log("cleared canvas");
   }
 </script>
 <style>
