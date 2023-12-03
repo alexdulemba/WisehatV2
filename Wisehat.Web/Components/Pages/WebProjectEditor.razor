@@ -65,9 +65,9 @@
   <div id="canvas">
     @if (WebProject is not null && WebProject.Widgets.Count > 0)
     {
-      @foreach (var widget in WebProject.Widgets)
+      @foreach (var widget in WBS.GetWidgetsByProject(ProjectId))
       {
-        <div id="@($"{widget.Type}_{widget.Id}")" 
+        <div id="@($"{widget.Type.ToString().ToLower()}_{widget.Id}")" 
              style="position: absolute; 
                     top: @(widget.Position.Y)px;
                     left: @(widget.Position.X)px;
@@ -75,14 +75,15 @@
                     height: @(widget.Size.Y)px;
                     border-radius: 4px;
                     border-color: @widget.BorderColor;
-                    background-color: @(string.IsNullOrEmpty(widget.BackgroundColor) ? "#e49273ff" : widget.BackgroundColor);
+                    background-color: @widget.BackgroundColor;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     cursor: grab;
-                    resize: both;"
+                    resize: both;
+                    overflow: auto;"
              draggable="true" 
-             title="@widget.Description">
+             class="dropped-widget">
           @widget.Content
         </div>
       }
@@ -99,8 +100,9 @@
 
   let urlParams = new URLSearchParams(window.location.search);
   let projectId = urlParams.get("projectId");
+  let canvas = document.getElementById("canvas");
 
-  document.querySelectorAll(".widget-preview").forEach((element) => {
+  document.querySelectorAll(".widget-preview").forEach(element => {
     element.addEventListener("dragstart", (event) => {
       let widgetType = element.dataset.widgetType;
       let styles = element.computedStyleMap();
@@ -124,15 +126,69 @@
     element.addEventListener("dragover", handleWidgetDragOver);
   });
 
-  function handleWidgetDragStart(e) {
-    console.log("started dragging fillbox");
+  document.querySelectorAll(".dropped-widget").forEach(element => {
+    element.addEventListener("dragstart", (event) => { 
+      console.log("stuff happened");
+      handleDroppedWidgetDragStart(event, element); 
+    });
+    console.log(element);
+  });
 
-    e.dataTransfer.effectAllowed = "copy";
-    e.dataTransfer.setData("data", e.target.id);
+  document.addEventListener("keydown", (event) => {
+    if (event.code === "Delete") {
+      let currentWidgets = [...canvas.children];
+      let currentlyFocusedWidgets = currentWidgets.filter(w => w.getAttribute("data-is-selected") === "true");
+      
+      if (connection != null) {
+        currentlyFocusedWidgets.forEach(w => {
+          let widgetGuid = w.id.split("_").pop();
+          connection.invoke("RemoveWidgetFromWebProject", projectId, widgetGuid).catch((err) => {
+            return console.error(err.toString());
+          });
+          w.remove();
+        });
+      }
+      else {
+        alert("Internal error: Could not remove widget. Please try refreshing the page.");
+      }
+    }
+  });
 
-    let elementRect = e.target.getBoundingClientRect();
-    e.dataTransfer.setData("grab-position-x", e.clientX - elementRect.left);
-    e.dataTransfer.setData("grab-position-y", e.clientY - elementRect.top);
+  function handleDroppedWidgetDragStart(event, element) {
+    event.stopPropagation();
+    let elementRect = event.target.getBoundingClientRect();
+    let grabPosition = {
+      "id": element.id,
+      "x": event.clientX - elementRect.left,
+      "y": event.clientY - elementRect.top
+    };
+    let json = JSON.stringify(grabPosition);
+    console.log(`started dragging: ${json}`);
+
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.dropEffect = "move";
+    event.dataTransfer.setData("grabPosition", json);
+  }
+
+  function handleNewDroppedWidgetResize(event, element) {
+    let width = element.style.width.replace("px", "");
+    let height = element.style.height.replace("px", "");
+    if (connection != null) {
+      connection.invoke("UpdateWidgetSize", projectId, width, height).catch((err) => {
+        return console.error(err.toString());
+      });
+    }
+  }
+
+  function handleDroppedWidgetResize(event, element) {
+    let styles = element.computedStyleMap();
+    let width = styles.get("width").toString().replace("px", "");
+    let height = styles.get("height").toString().replace("px", "");
+    if (connection != null) {
+      connection.invoke("UpdateWidgetSize", projectId, width, height).catch((err) => {
+        return console.error(err.toString());
+      });
+    }
   }
 
   function handleWidgetDragOver(e) {
@@ -150,18 +206,20 @@
 
     if (e.dataTransfer.effectAllowed === "copy") {
       let widgetData = JSON.parse(e.dataTransfer.getData("widgetData"));
-      console.log(widgetData);
 
       let newElement = createElementFromWidget(widgetData, e);
 
+      newElement.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, newElement));
+      // newElement.addEventListener("resize", (e) => handleNewDroppedWidgetResize(e, newElement)); // Use ResizeObserver API
+
       if (connection != null) {
-        connection.invoke("ServerReceiveWidget", widgetData, projectId).catch((err) => {
+        connection.invoke("AddWidgetToWebProject", projectId, widgetData).catch((err) => {
           return console.error(err.toString());
         });
       }
-
       e.target.appendChild(newElement);
-    } else {
+    } 
+    else {
       let grabPosition = JSON.parse(e.dataTransfer.getData("grabPosition"));
 
       let canvasRect = document.getElementById("canvas").getBoundingClientRect();
@@ -171,12 +229,18 @@
       let draggingElement = document.getElementById(grabPosition.id);
       draggingElement.style.setProperty("top", `${newPositionY}px`);
       draggingElement.style.setProperty("left", `${newPositionX}px`);
+
+      if (connection != null) {
+        let widgetGuid = grabPosition.id.split("_").pop();
+        connection.invoke("UpdateWidgetPosition", widgetGuid, newPositionX, newPositionY).catch((err) => {
+          return console.error(err.toString());
+        });
+      }
     }
     
     return false;
   }
 
-  let canvas = document.getElementById("canvas");
   canvas.addEventListener("dragover", handleCanvasDragOver);
   canvas.addEventListener("drop", handleCanvasDrop);
   canvas.addEventListener("click", (e) => {
@@ -214,7 +278,7 @@
 
   protected override async Task OnInitializedAsync()
   {
-    WBS.RemoveAllWidgetsForProject(ProjectId);
+    WBS.RemoveAllWidgetsForProject(ProjectId); // clear cache
 
     var query = new GetWebProject.Query(ProjectId);
     WebProject = await Sender.Send(query);
@@ -225,12 +289,13 @@
       return;
     }
     PreviousTitle = WebProject.Name;
+    WBS.AddWidgets(WebProject.Id, WebProject.Widgets);
 
     _hubConnection = new HubConnectionBuilder()
         .WithUrl(NavigationManager.ToAbsoluteUri("/webprojects"))
         .Build();
 
-    _hubConnection.On<Guid, string>("UpdateWebProjectTitle", (projectId, newTitle) =>
+    _hubConnection.On<Guid, string>("IncomingNewWebProjectTitle", (projectId, newTitle) =>
     {
       if (projectId == this.ProjectId)
       {
@@ -264,9 +329,9 @@
 
   public async ValueTask DisposeAsync()
   {
+    WBS.RemoveAllWidgetsForProject(ProjectId);
+
     if (_hubConnection is not null)
       await _hubConnection.DisposeAsync();
-
-    WBS.RemoveAllWidgetsForProject(ProjectId);
   }
 }

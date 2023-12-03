@@ -7,7 +7,7 @@ using Wisehat.Web.Services;
 
 namespace Wisehat.Web.Hubs;
 
-public class WebProjectHub : Hub<WebProjectCommands>
+public class WebProjectHub : Hub<IWebProjectCommands>
 {
   private readonly WidgetBucketService _widgetBucketService;
   private readonly ISender _sender;
@@ -36,18 +36,31 @@ public class WebProjectHub : Hub<WebProjectCommands>
   {
     _logger.LogInformation("Project {projectId} title updated to {newProjectTitle}, sending new info to other open editors...", projectId, newProjectTitle);
     await Clients.OthersInGroup(projectId.ToString())
-      .UpdateWebProjectTitle(projectId, newProjectTitle);
+      .IncomingNewWebProjectTitle(projectId, newProjectTitle);
   }
 
-  public void ServerReceiveWidgets(Widget[] widgets)
-  {
-    Debug.WriteLine(widgets); 
-  }
-
-  public void ServerReceiveWidget(Widget widget, Guid projectId)
+  public void AddWidgetToWebProject(Guid projectId, Widget widget)
   {
     _logger.LogInformation("Received widget {widgetId} for project {projectId}", widget.Id, projectId);
     _widgetBucketService.AddWidget(projectId, widget);
+  }
+
+  public void UpdateWidgetPosition(Guid widgetId, float positionX, float positionY)
+  {
+    _logger.LogInformation("Updating stored widget position");
+    _widgetBucketService.UpdateWidgetPosition(widgetId, positionX, positionY);
+  }
+
+  public void UpdateWidgetSize(Guid widgetId, float newWidth, float newHeight)
+  {
+    _logger.LogInformation("Updating stored widget size");
+    _widgetBucketService.UpdateWidgetSize(widgetId, newWidth, newHeight);
+  }
+
+  public void RemoveWidgetFromWebProject(Guid projectId, Guid widgetId)
+  {
+    _logger.LogInformation("Removing widget {widgetId} from project {projectId}", widgetId, projectId);
+    _widgetBucketService.RemoveWidget(projectId, widgetId);
   }
 
   public async Task SaveWebProjectAsync(Guid projectId)
@@ -59,7 +72,7 @@ public class WebProjectHub : Hub<WebProjectCommands>
   }
 }
 
-public interface WebProjectCommands
+public interface IWebProjectCommands
 {
-  Task UpdateWebProjectTitle(Guid id, string message);
+  Task IncomingNewWebProjectTitle(Guid id, string message);
 }

@@ -71,26 +71,5 @@ export function createElementFromWidget(widgetData, event) {
     }
   });
 
-  newElement.addEventListener("dragstart", (e) => {
-    let elementRect = e.target.getBoundingClientRect();
-    let grabPosition = {
-      "id": newElement.id,
-      "x": e.clientX - elementRect.left,
-      "y": e.clientY - elementRect.top
-    };
-    let json = JSON.stringify(grabPosition);
-
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.dropEffect = "move";
-    e.dataTransfer.setData("grabPosition", json);
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.code === "Delete" && newElement.dataset.isSelected == "true") {
-      console.log(`removed ${newElement.id}`);
-      newElement.remove();
-    }
-  });
-
   return newElement;
 }
