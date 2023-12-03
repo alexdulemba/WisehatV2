@@ -31,12 +31,12 @@ export class Theme {
 }
 
 
-export function createElementFromWidget(widget, event, onDragStart) {
+export function createElementFromWidget(widgetData, event) {
   let newElement = document.createElement("div");
   let canvasRect = document.getElementById("canvas").getBoundingClientRect();
-  let newPositionX = event.clientX - canvasRect.left - widget.grabPosition.x;
-  let newPositionY = event.clientY - canvasRect.top - widget.grabPosition.y;
-  widget.position = { "x": newPositionX, "y": newPositionY };
+  let newPositionX = event.clientX - canvasRect.left - widgetData.grabPosition.x;
+  let newPositionY = event.clientY - canvasRect.top - widgetData.grabPosition.y;
+  widgetData.position = { "x": newPositionX, "y": newPositionY };
 
   newElement.style.width = "150px";
   newElement.style.height = "70px";
@@ -47,26 +47,40 @@ export function createElementFromWidget(widget, event, onDragStart) {
   newElement.style.alignItems = "center";
   newElement.style.cursor = "grab";
   newElement.style.resize = "both";
+  newElement.style.overflow = "auto";
   newElement.draggable = true;
 
-  newElement.id = `${widget.widgetType}_${widget.id}`;
+  newElement.dataset.widgetType = widgetData.type;
+  newElement.id = `${widgetData.type}_${widgetData.id}`;
   newElement.style.position = "absolute";
   newElement.style.top = `${newPositionY}px`;
   newElement.style.left = `${newPositionX}px`;
-
-  newElement.addEventListener("dragstart", onDragStart);
 
   newElement.dataset.isSelected = false;
   newElement.addEventListener("click", (e) => {
     if (newElement.dataset.isSelected == "true") {
       newElement.blur();
-      newElement.style.border = "none";
+      newElement.classList.remove("selected-widget");
       newElement.dataset.isSelected = false;
     } else {
       newElement.focus();
-      newElement.style.border = "1px dashed black";
+      newElement.classList.add("selected-widget");
       newElement.dataset.isSelected = true;
     }
+  });
+
+  newElement.addEventListener("dragstart", (e) => {
+    let elementRect = e.target.getBoundingClientRect();
+    let grabPosition = {
+      "id": newElement.id,
+      "x": e.clientX - elementRect.left,
+      "y": e.clientY - elementRect.top
+    };
+    let json = JSON.stringify(grabPosition);
+
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.dropEffect = "move";
+    e.dataTransfer.setData("grabPosition", json);
   });
 
   document.addEventListener("keydown", (e) => {

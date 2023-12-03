@@ -122,25 +122,10 @@
     element.addEventListener("dragover", handleWidgetDragOver);
   });
 
-  let canvas = document.getElementById("canvas");
-  canvas.addEventListener("dragover", handleCanvasDragOver);
-  canvas.addEventListener("drop", handleCanvasDrop);
-
   function handleWidgetDragStart(e) {
     console.log("started dragging fillbox");
 
     e.dataTransfer.effectAllowed = "copy";
-    e.dataTransfer.setData("data", e.target.id);
-
-    let elementRect = e.target.getBoundingClientRect();
-    e.dataTransfer.setData("grab-position-x", e.clientX - elementRect.left);
-    e.dataTransfer.setData("grab-position-y", e.clientY - elementRect.top);
-  }
-
-  function newHandleWidgetDragStart(e) {
-    console.log("started dragging dropped fillbox");
-
-    e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("data", e.target.id);
 
     let elementRect = e.target.getBoundingClientRect();
@@ -163,9 +148,8 @@
 
     if (e.dataTransfer.effectAllowed === "copy") {
       let widgetData = JSON.parse(e.dataTransfer.getData("widgetData"));
-      console.log(`${widgetData.type} dropped on canvas`);
 
-      let newElement = createElementFromWidget(widgetData, e, newHandleWidgetDragStart);
+      let newElement = createElementFromWidget(widgetData, e);
 
       if (connection != null) {
         connection.invoke("ServerReceiveWidget", widgetData, projectId).catch((err) => {
@@ -175,12 +159,34 @@
 
       e.target.appendChild(newElement);
     } else {
-      console.log("started dragging element on canvas");
-      let widgetData = e.dataTransfer.getData("widgetData");
+      let grabPosition = JSON.parse(e.dataTransfer.getData("grabPosition"));
+
+      let canvasRect = document.getElementById("canvas").getBoundingClientRect();
+      let newPositionX = e.clientX - canvasRect.left - grabPosition.x;
+      let newPositionY = e.clientY - canvasRect.top - grabPosition.y;
+
+      let draggingElement = document.getElementById(grabPosition.id);
+      draggingElement.style.setProperty("top", `${newPositionY}px`);
+      draggingElement.style.setProperty("left", `${newPositionX}px`);
     }
     
     return false;
   }
+
+  let canvas = document.getElementById("canvas");
+  canvas.addEventListener("dragover", handleCanvasDragOver);
+  canvas.addEventListener("drop", handleCanvasDrop);
+  canvas.addEventListener("click", (e) => {
+    if (e.target.id === canvas.id) { 
+      let currentWidgets = [...canvas.children];
+      console.log(currentWidgets);
+      let currentlyFocusedWidgets = currentWidgets.filter(w => w.getAttribute("data-is-selected") === "true");
+      currentlyFocusedWidgets.forEach(w => {
+        w.setAttribute("data-is-selected", "false");
+        w.classList.remove("selected-widget");
+      });
+    }
+  });
 
   document.getElementById("clear-canvas-btn").addEventListener("click", handleClearCanvas);
   function handleClearCanvas(e) {
@@ -189,7 +195,11 @@
     console.log("cleared canvas");
   }
 </script>
-
+<style>
+  .selected-widget {
+    border: 1px dashed black;
+  }
+</style>
 
 @code {
   [SupplyParameterFromQuery]
