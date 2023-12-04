@@ -116,7 +116,6 @@ export function handleDroppedWidgetDragStart(event, elementId) {
     "y": event.clientY - elementRect.top
   };
   let json = JSON.stringify(grabPosition);
-  console.log(`started dragging: ${json}`);
 
   event.dataTransfer.effectAllowed = "move";
   event.dataTransfer.dropEffect = "move";
@@ -161,7 +160,6 @@ export function handleCanvasDrop(e) {
       let newPositionY = e.clientY - canvasRect.top - grabPosition.y;
 
       let draggingElement = document.getElementById(grabPosition.id);
-      console.log(draggingElement);
       draggingElement.style.setProperty("top", `${newPositionY}px`);
       draggingElement.style.setProperty("left", `${newPositionX}px`);
 
@@ -205,7 +203,6 @@ document.querySelectorAll(".widget-preview").forEach(element => {
   element.addEventListener("dragover", handleWidgetDragOver);
 });
 
-console.log(document.querySelectorAll(".dropped-widget").length);
 document.querySelectorAll(".dropped-widget").forEach(element => {
   element.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, element.id));
 })
