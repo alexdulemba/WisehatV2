@@ -1,5 +1,5 @@
 ﻿@page "/editor"
-@rendermode @(new InteractiveServerRenderMode(false))
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using Microsoft.AspNetCore.SignalR.Client
 @using System.Diagnostics
 @using Wisehat.Domain.Commands.WebProjects
@@ -84,7 +84,7 @@
                     overflow: auto;"
              draggable="true" 
              class="dropped-widget">
-          @widget.Content
+          @((MarkupString)(widget.Content ?? ""))
         </div>
       }
     }
@@ -98,9 +98,23 @@
   import { createElementFromWidget } from './js/widgetHelper.js';
   import { v4 as uuid } from 'https://jspm.dev/uuid';
 
+  console.log("running nameless module");
   let urlParams = new URLSearchParams(window.location.search);
   let projectId = urlParams.get("projectId");
   let canvas = document.getElementById("canvas");
+  let resizeObserver = new ResizeObserver(entries => {
+    entries.forEach(entry => {
+
+      console.log("resized widget");
+      // if (connection != null) {
+      //   let width = entry.contentBoxSize[0].inlineSize;
+      //   let height = entry.contentBoxSize[0].blockSize;
+      //   connection.invoke("UpdateWidgetSize", projectId, width, height).catch((err) => {
+      //     return console.error(err.toString());
+      //   });
+      // }
+    });
+  });
 
   document.querySelectorAll(".widget-preview").forEach(element => {
     element.addEventListener("dragstart", (event) => {
@@ -126,6 +140,7 @@
     element.addEventListener("dragover", handleWidgetDragOver);
   });
 
+  // this isn't working for some reason
   document.querySelectorAll(".dropped-widget").forEach(element => {
     element.addEventListener("dragstart", (event) => { 
       console.log("stuff happened");
@@ -170,27 +185,6 @@
     event.dataTransfer.setData("grabPosition", json);
   }
 
-  function handleNewDroppedWidgetResize(event, element) {
-    let width = element.style.width.replace("px", "");
-    let height = element.style.height.replace("px", "");
-    if (connection != null) {
-      connection.invoke("UpdateWidgetSize", projectId, width, height).catch((err) => {
-        return console.error(err.toString());
-      });
-    }
-  }
-
-  function handleDroppedWidgetResize(event, element) {
-    let styles = element.computedStyleMap();
-    let width = styles.get("width").toString().replace("px", "");
-    let height = styles.get("height").toString().replace("px", "");
-    if (connection != null) {
-      connection.invoke("UpdateWidgetSize", projectId, width, height).catch((err) => {
-        return console.error(err.toString());
-      });
-    }
-  }
-
   function handleWidgetDragOver(e) {
     e.preventDefault();
     return false;
@@ -210,7 +204,7 @@
       let newElement = createElementFromWidget(widgetData, e);
 
       newElement.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, newElement));
-      // newElement.addEventListener("resize", (e) => handleNewDroppedWidgetResize(e, newElement)); // Use ResizeObserver API
+      resizeObserver.observe(newElement);
 
       if (connection != null) {
         connection.invoke("AddWidgetToWebProject", projectId, widgetData).catch((err) => {
@@ -256,8 +250,12 @@
 
   document.getElementById("clear-canvas-btn").addEventListener("click", handleClearCanvas);
   function handleClearCanvas(e) {
-    var canvas = document.querySelector("#canvas");
-    canvas.replaceChildren();
+    if (connection != null) {
+      connection.invoke("RemoveAllWidgetsFromWebProject", projectId).catch(err => {
+        console.error(err.toString());
+      });
+      canvas.replaceChildren();
+    }
   }
 </script>
 <style>

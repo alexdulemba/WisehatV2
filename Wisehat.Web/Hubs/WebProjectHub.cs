@@ -63,6 +63,12 @@ public class WebProjectHub : Hub<IWebProjectCommands>
     _widgetBucketService.RemoveWidget(projectId, widgetId);
   }
 
+  public void RemoveAllWidgetsFromWebProject(Guid projectId)
+  {
+    _logger.LogInformation("Removing all widgets from project {projectId}", projectId);
+    _widgetBucketService.RemoveAllWidgetsForProject(projectId);
+  }
+
   public async Task SaveWebProjectAsync(Guid projectId)
   {
     var widgets = _widgetBucketService.GetWidgetsByProject(projectId);
