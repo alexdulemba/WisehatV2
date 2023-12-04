@@ -1,5 +1,5 @@
 ﻿@page "/editor"
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@rendermode @(new InteractiveAutoRenderMode(prerender: false))
 @using Microsoft.AspNetCore.SignalR.Client
 @using System.Diagnostics
 @using Wisehat.Domain.Commands.WebProjects
@@ -67,7 +67,8 @@
     {
       @foreach (var widget in WBS.GetWidgetsByProject(ProjectId))
       {
-        <div id="@($"{widget.Type.ToString().ToLower()}_{widget.Id}")" 
+        var id = $"{widget.Type.ToString().ToLower()}_{widget.Id}";
+        <div id="@(id)" 
              style="position: absolute; 
                     top: @(widget.Position.Y)px;
                     left: @(widget.Position.X)px;
@@ -83,7 +84,8 @@
                     resize: both;
                     overflow: auto;"
              draggable="true" 
-             class="dropped-widget">
+             class="dropped-widget"
+             ondragstart="(e) => window.handleDroppedWidgetDragStart(e, @(id))">
           @((MarkupString)(widget.Content ?? ""))
         </div>
       }
@@ -116,6 +118,7 @@
     });
   });
 
+  console.log("got here 1");
   document.querySelectorAll(".widget-preview").forEach(element => {
     element.addEventListener("dragstart", (event) => {
       let widgetType = element.dataset.widgetType;
@@ -140,14 +143,16 @@
     element.addEventListener("dragover", handleWidgetDragOver);
   });
 
-  // this isn't working for some reason
-  document.querySelectorAll(".dropped-widget").forEach(element => {
-    element.addEventListener("dragstart", (event) => { 
-      console.log("stuff happened");
-      handleDroppedWidgetDragStart(event, element); 
-    });
-    console.log(element);
-  });
+  // console.log("got here 2");
+  // // this isn't working for some reason
+  // console.log(document.querySelectorAll(".dropped-widget").length);
+  // document.querySelectorAll(".dropped-widget").forEach(element => {
+  //   console.log(element.id);
+  //   element.addEventListener("dragstart", (event) => {
+  //     console.log("stuff happened");
+  //     handleDroppedWidgetDragStart(event, element);
+  //   });
+  // });
 
   document.addEventListener("keydown", (event) => {
     if (event.code === "Delete") {
@@ -169,11 +174,11 @@
     }
   });
 
-  function handleDroppedWidgetDragStart(event, element) {
+  function handleDroppedWidgetDragStart(event, elementId) {
     event.stopPropagation();
     let elementRect = event.target.getBoundingClientRect();
     let grabPosition = {
-      "id": element.id,
+      "id": elementId,
       "x": event.clientX - elementRect.left,
       "y": event.clientY - elementRect.top
     };
@@ -184,6 +189,7 @@
     event.dataTransfer.dropEffect = "move";
     event.dataTransfer.setData("grabPosition", json);
   }
+  window.handleDroppedWidgetDragStart = handleDroppedWidgetDragStart;
 
   function handleWidgetDragOver(e) {
     e.preventDefault();
@@ -203,7 +209,7 @@
 
       let newElement = createElementFromWidget(widgetData, e);
 
-      newElement.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, newElement));
+      newElement.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, newElement.id));
       resizeObserver.observe(newElement);
 
       if (connection != null) {
