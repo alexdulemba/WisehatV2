@@ -50,7 +50,7 @@
       <div class="widget-preview-container">
         <h2>Image box</h2>
         <div id="imagebox-widget" class="widget-preview" draggable="true" data-widget-type="imagebox">
-          <img src="sample-image.jpg"/>
+          <img src="sample-image.jpg" />
         </div>
       </div>
       <div class="widget-preview-container">
@@ -59,7 +59,7 @@
           <iframe width="150" height="80" src="https://youtu.be/dQw4w9WgXcQ?si=yU6qF0_BJpAY01d9" longdesc="Youtube Video">
           </iframe>
         </div>
-      </div>      
+      </div>
     </div>
   </div>
   <div id="canvas">
@@ -68,8 +68,8 @@
       @foreach (var widget in WBS.GetWidgetsByProject(ProjectId))
       {
         var id = $"{widget.Type.ToString().ToLower()}_{widget.Id}";
-        <div id="@(id)" 
-             style="position: absolute; 
+        <div id="@(id)"
+             style="position: absolute;
                     top: @(widget.Position.Y)px;
                     left: @(widget.Position.X)px;
                     width: @(widget.Size.X)px;
@@ -83,7 +83,7 @@
                     cursor: grab;
                     resize: both;
                     overflow: auto;"
-             draggable="true" 
+             draggable="true"
              class="dropped-widget">
           @((MarkupString)(widget.Content ?? ""))
         </div>
@@ -145,7 +145,10 @@
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
     _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/WebProjectEditor.razor.js");
-    await _jsModule.InvokeVoidAsync("init");
+    if (!firstRender)
+    {
+      await _jsModule.InvokeVoidAsync("initializeEventListeners");
+    }
   }
 
   internal async Task HandleTitleChange(FocusEventArgs args)

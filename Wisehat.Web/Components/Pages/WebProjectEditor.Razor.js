@@ -67,12 +67,13 @@ const resizeObserver = new ResizeObserver(entries => {
   entries.forEach(entry => {
     let timeoutId = resizeObserverEntries[entry.target.id];
     clearTimeout(timeoutId);
-    console.log(entry.target.id);
     resizeObserverEntries[entry.target.id] = setTimeout(() => {
       if (connection != null) {
         connection.invoke("UpdateWidgetSize", entry.target.id.split("_").pop(), entry.contentRect.width, entry.contentRect.height).catch(err => {
           console.error(err.toString());
         });
+      } else {
+        console.error("SignalR connection not initialized");
       }
     }, 500);
   });
@@ -80,7 +81,7 @@ const resizeObserver = new ResizeObserver(entries => {
 
 
 // JS Helper functions
-export function createElementFromWidget(widgetData, event) {
+function createElementFromWidget(widgetData, event) {
   let newElement = document.createElement("div");
   let canvasRect = document.getElementById("canvas").getBoundingClientRect();
   let newPositionX = event.clientX - canvasRect.left - widgetData.grabPosition.x;
@@ -123,7 +124,28 @@ export function createElementFromWidget(widgetData, event) {
   return newElement;
 }
 
-export function handleDroppedWidgetDragStart(event, elementId) {
+function handleWidgetDragStart(event, element) {
+  let widgetType = element.dataset.widgetType;
+  let styles = element.computedStyleMap();
+
+  let elementRect = event.target.getBoundingClientRect();
+  let widget = new Widget(
+    uuid(),
+    null,
+    widgetType,
+    { "x": event.clientX - elementRect.left, "y": event.clientY - elementRect.top },
+    { "x": 150, "y": 70 },
+    element.innerHTML,
+    styles.get("background-color").toString(),
+    styles.get("border-color").toString(),
+    null
+  );
+
+  event.dataTransfer.effectAllowed = "copy";
+  event.dataTransfer.setData("widgetData", JSON.stringify(widget));
+}
+
+function handleDroppedWidgetDragStart(event, elementId) {
   event.stopPropagation();
   let elementRect = event.target.getBoundingClientRect();
   let grabPosition = {
@@ -138,17 +160,17 @@ export function handleDroppedWidgetDragStart(event, elementId) {
   event.dataTransfer.setData("grabPosition", json);
 }
 
-export function handleWidgetDragOver(e) {
+function handleWidgetDragOver(e) {
   e.preventDefault();
   return false;
 }
 
-export function handleCanvasDragOver(e) {
+function handleCanvasDragOver(e) {
   e.preventDefault();
   return false;
 }
 
-export function handleCanvasDrop(e) {
+function handleCanvasDrop(e) {
   e.stopPropagation();
 
   if (e.dataTransfer.effectAllowed === "copy") {
@@ -194,77 +216,59 @@ export function handleCanvasDrop(e) {
   return false;
 }
 
-
-document.querySelectorAll(".widget-preview").forEach(element => {
-  element.addEventListener("dragstart", (event) => {
-    let widgetType = element.dataset.widgetType;
-    let styles = element.computedStyleMap();
-
-    let elementRect = event.target.getBoundingClientRect();
-    let widget = new Widget(
-      uuid(),
-      null,
-      widgetType,
-      { "x": event.clientX - elementRect.left, "y": event.clientY - elementRect.top },
-      { "x": 150, "y": 70 },
-      element.innerHTML,
-      styles.get("background-color").toString(),
-      styles.get("border-color").toString(),
-      null
-    );
-
-    event.dataTransfer.effectAllowed = "copy";
-    event.dataTransfer.setData("widgetData", JSON.stringify(widget));
+export function initializeEventListeners() {
+  console.log("initializing event listeners");
+  document.querySelectorAll(".widget-preview").forEach(widget => {
+    widget.addEventListener("dragstart", (e) => handleWidgetDragStart(e, widget));
+    widget.addEventListener("dragover", handleWidgetDragOver);
   });
-  element.addEventListener("dragover", handleWidgetDragOver);
-});
 
-export function init() {
-  console.log(document.querySelectorAll(".dropped-widget").length);
   document.querySelectorAll(".dropped-widget").forEach(element => {
     element.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, element.id));
     resizeObserver.observe(element);
   });
-}
 
-document.addEventListener("keydown", (event) => {
-  if (event.code === "Delete") {
-    let currentWidgets = [...canvas.children];
-    let currentlyFocusedWidgets = currentWidgets.filter(w => w.getAttribute("data-is-selected") === "true");
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Delete") {
+      let currentWidgets = [...canvas.children];
+      let currentlyFocusedWidgets = currentWidgets.filter(w => w.getAttribute("data-is-selected") === "true");
 
-    if (connection != null) {
-      currentlyFocusedWidgets.forEach(w => {
-        let widgetGuid = w.id.split("_").pop();
-        connection.invoke("RemoveWidgetFromWebProject", projectId, widgetGuid).catch((err) => {
-          return console.error(err.toString());
+      if (connection != null) {
+        currentlyFocusedWidgets.forEach(w => {
+          let widgetGuid = w.id.split("_").pop();
+          connection.invoke("RemoveWidgetFromWebProject", projectId, widgetGuid).catch((err) => {
+            return console.error(err.toString());
+          });
+          w.remove();
         });
-        w.remove();
+      }
+      else {
+        alert("Internal error: Could not remove widget. Please try refreshing the page.");
+      }
+    }
+  });
+
+  canvas.addEventListener("dragover", handleCanvasDragOver);
+  canvas.addEventListener("drop", handleCanvasDrop);
+  canvas.addEventListener("click", (e) => {
+    if (e.target.id === canvas.id) {
+      let currentWidgets = [...canvas.children];
+      let currentlyFocusedWidgets = currentWidgets.filter(w => w.getAttribute("data-is-selected") === "true");
+      currentlyFocusedWidgets.forEach(w => {
+        w.setAttribute("data-is-selected", "false");
+        w.classList.remove("selected-widget");
       });
     }
-    else {
-      alert("Internal error: Could not remove widget. Please try refreshing the page.");
+  });
+
+  document.getElementById("clear-canvas-btn").addEventListener("click", (e) => {
+    if (connection != null) {
+      connection.invoke("RemoveAllWidgetsFromWebProject", projectId).catch(err => {
+        console.error(err.toString());
+      });
+      canvas.replaceChildren();
+    } else {
+      console.error("SignalR connection not initialized");
     }
-  }
-});
-
-canvas.addEventListener("dragover", handleCanvasDragOver);
-canvas.addEventListener("drop", handleCanvasDrop);
-canvas.addEventListener("click", (e) => {
-  if (e.target.id === canvas.id) {
-    let currentWidgets = [...canvas.children];
-    let currentlyFocusedWidgets = currentWidgets.filter(w => w.getAttribute("data-is-selected") === "true");
-    currentlyFocusedWidgets.forEach(w => {
-      w.setAttribute("data-is-selected", "false");
-      w.classList.remove("selected-widget");
-    });
-  }
-});
-
-document.getElementById("clear-canvas-btn").addEventListener("click", (e) => {
-  if (connection != null) {
-    connection.invoke("RemoveAllWidgetsFromWebProject", projectId).catch(err => {
-      console.error(err.toString());
-    });
-    canvas.replaceChildren();
-  }
-});
+  });
+}
