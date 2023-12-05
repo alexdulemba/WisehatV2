@@ -62,6 +62,22 @@ let urlParams = new URLSearchParams(window.location.search);
 let projectId = urlParams.get("projectId");
 let canvas = document.getElementById("canvas");
 
+let resizeObserverEntries = {};
+const resizeObserver = new ResizeObserver(entries => {
+  entries.forEach(entry => {
+    let timeoutId = resizeObserverEntries[entry.target.id];
+    clearTimeout(timeoutId);
+    console.log(entry.target.id);
+    resizeObserverEntries[entry.target.id] = setTimeout(() => {
+      if (connection != null) {
+        connection.invoke("UpdateWidgetSize", entry.target.id.split("_").pop(), entry.contentRect.width, entry.contentRect.height).catch(err => {
+          console.error(err.toString());
+        });
+      }
+    }, 500);
+  });
+});
+
 
 // JS Helper functions
 export function createElementFromWidget(widgetData, event) {
@@ -141,7 +157,7 @@ export function handleCanvasDrop(e) {
     let newElement = createElementFromWidget(widgetData, e);
 
     newElement.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, newElement.id));
-    //resizeObserver.observe(newElement);
+    resizeObserver.observe(newElement);
 
     if (connection != null) {
       connection.invoke("AddWidgetToWebProject", projectId, widgetData).catch((err) => {
@@ -203,9 +219,13 @@ document.querySelectorAll(".widget-preview").forEach(element => {
   element.addEventListener("dragover", handleWidgetDragOver);
 });
 
-document.querySelectorAll(".dropped-widget").forEach(element => {
-  element.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, element.id));
-})
+export function init() {
+  console.log(document.querySelectorAll(".dropped-widget").length);
+  document.querySelectorAll(".dropped-widget").forEach(element => {
+    element.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, element.id));
+    resizeObserver.observe(element);
+  });
+}
 
 document.addEventListener("keydown", (event) => {
   if (event.code === "Delete") {

@@ -144,10 +144,8 @@
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
-    if (firstRender)
-    {
-      _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/WebProjectEditor.razor.js");
-    }
+    _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/WebProjectEditor.razor.js");
+    await _jsModule.InvokeVoidAsync("init");
   }
 
   internal async Task HandleTitleChange(FocusEventArgs args)
