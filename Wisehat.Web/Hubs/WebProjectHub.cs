@@ -9,11 +9,11 @@ namespace Wisehat.Web.Hubs;
 
 public class WebProjectHub : Hub<IWebProjectCommands>
 {
-  private readonly WidgetBucketService _widgetBucketService;
+  private readonly EditorWidgetCacheService _widgetBucketService;
   private readonly ISender _sender;
   private readonly ILogger<WebProjectHub> _logger;
 
-  public WebProjectHub(WidgetBucketService widgetBucketService, ISender sender, ILogger<WebProjectHub> logger)
+  public WebProjectHub(EditorWidgetCacheService widgetBucketService, ISender sender, ILogger<WebProjectHub> logger)
   {
     _widgetBucketService = widgetBucketService;
     _sender = sender;
@@ -55,6 +55,12 @@ public class WebProjectHub : Hub<IWebProjectCommands>
   {
     _logger.LogInformation("Updating stored widget size");
     _widgetBucketService.UpdateWidgetSize(widgetId, newWidth, newHeight);
+  }
+
+  public void UpdateWidgetFillColor(Guid widgetId, string hexColor)
+  {
+    _logger.LogInformation("Updating stored widget fill color");
+    _widgetBucketService.UpdateWidgetFillColor(widgetId, hexColor);
   }
 
   public void RemoveWidgetFromWebProject(Guid projectId, Guid widgetId)

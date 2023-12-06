@@ -89,6 +89,25 @@ const resizeObserver = new ResizeObserver(entries => {
 
 
 // JS Helper functions
+function handleShowContextMenu(e) {
+  e.preventDefault();
+  if (contextMenu.dataset.hidden === "true") {
+    contextMenu.style.top = `${e.clientY}px`;
+    contextMenu.style.left = `${e.clientX}px`;
+    contextMenu.classList.remove("hidden");
+    contextMenu.dataset.hidden = "false";
+    contextMenu.dataset.targetWidgetId = e.target.id;
+  } else {
+    contextMenu.classList.add("hidden");
+    contextMenu.dataset.hidden = "true";
+    contextMenu.dataset.targetWidgetId = "";
+  }
+}
+
+function parseWidgetGuid(widgetId) {
+  return widgetId.split("_").pop();
+}
+
 function handleWidgetFocus(event, element) {
   if (element.dataset.isSelected == "true") {
     element.blur();
@@ -111,7 +130,7 @@ function createElementFromWidget(widgetData, event) {
   newElement.style.width = "150px";
   newElement.style.height = "70px";
   newElement.style.borderRadius = "4px";
-  newElement.style.backgroundColor = widgetData.backgroundColor;
+  newElement.style.backgroundColor = Theme.atomicTangerineHEX;
   newElement.style.borderColor = widgetData.borderColor;
   newElement.style.display = "flex";
   newElement.style.justifyContent = "center";
@@ -189,6 +208,7 @@ function handleCanvasDrop(e) {
     let newElement = createElementFromWidget(widgetData, e);
 
     newElement.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, newElement.id));
+    newElement.addEventListener("contextmenu", handleShowContextMenu);
     resizeObserver.observe(newElement);
 
     if (connection != null) {
@@ -212,7 +232,7 @@ function handleCanvasDrop(e) {
       draggingElement.style.setProperty("left", `${newPositionX}px`);
 
       if (connection != null) {
-        let widgetGuid = grabPosition.id.split("_").pop();
+        let widgetGuid = parseWidgetGuid(grabPosition.id);
         connection.invoke("UpdateWidgetPosition", widgetGuid, newPositionX, newPositionY).catch((err) => {
           return console.error(err.toString());
         });
@@ -229,6 +249,7 @@ function handleCanvasDrop(e) {
 
 export function initializeEventListeners() {
   console.log("initializing event listeners");
+
   document.querySelectorAll(".widget-preview").forEach(widget => {
     widget.addEventListener("dragstart", (e) => handleWidgetDragStart(e, widget));
     widget.addEventListener("dragover", handleWidgetDragOver);
@@ -237,18 +258,7 @@ export function initializeEventListeners() {
   document.querySelectorAll(".dropped-widget").forEach(widget => {
     widget.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, widget.id));
     resizeObserver.observe(widget);
-    widget.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      if (contextMenu.dataset.hidden === "true") {
-        contextMenu.style.top = `${e.clientY}px`;
-        contextMenu.style.left = `${e.clientX}px`;
-        contextMenu.classList.remove("hidden");
-        contextMenu.dataset.hidden = "false";
-      } else {
-        contextMenu.classList.add("hidden");
-        contextMenu.dataset.hidden = "true";
-      }
-    });
+    widget.addEventListener("contextmenu", handleShowContextMenu);
     widget.addEventListener("click", (e) => handleWidgetFocus(e, widget));
   });
 
@@ -259,7 +269,7 @@ export function initializeEventListeners() {
 
       if (connection != null) {
         currentlyFocusedWidgets.forEach(w => {
-          let widgetGuid = w.id.split("_").pop();
+          let widgetGuid = parseWidgetGuid(w.id);
           connection.invoke("RemoveWidgetFromWebProject", projectId, widgetGuid).catch((err) => {
             return console.error(err.toString());
           });
@@ -300,4 +310,20 @@ export function initializeEventListeners() {
       console.error("SignalR connection not initialized");
     }
   });
+
+  document.getElementById("widget-fill-color-input").addEventListener("change", (e) => {
+    let targetWidgetId = contextMenu.dataset.targetWidgetId;
+    if (targetWidgetId != null && targetWidgetId.length > 0) {
+      let targetWidget = document.getElementById(targetWidgetId);
+      targetWidget.style.backgroundColor = e.target.value;
+
+      if (connection != null) {
+        let widgetGuid = parseWidgetGuid(targetWidgetId);
+        connection.invoke("UpdateWidgetFillColor", widgetGuid, e.target.value).catch(err => {
+          console.error(`Couldn't update widget fill color: ${err.toString()}`);
+        });
+      }
+    }
+
+  }, false);
 }

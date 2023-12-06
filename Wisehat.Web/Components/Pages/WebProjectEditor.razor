@@ -12,7 +12,7 @@
 @inject ISender Sender
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
-@inject WidgetBucketService WBS
+@inject EditorWidgetCacheService WBS
 @layout EditorLayout
 @implements IAsyncDisposable
 
@@ -92,7 +92,10 @@
     }
   </div>
   <div id="context-menu" class="hidden" data-hidden="true">
-    <div class="menu-btn">Change fill color</div>
+    <div class="menu-btn" id="fill-color-container">
+      Change fill color: 
+      <input type="color" value="#e49273ff" id="widget-fill-color-input" />
+    </div>
     <div class="menu-btn">Change border</div>
     <div class="menu-btn">Delete</div>
     <div class="menu-btn">About this widget</div>

@@ -3,12 +3,12 @@ using Wisehat.Domain.Entities;
 
 namespace Wisehat.Web.Services;
 
-public class WidgetBucketService
+public class EditorWidgetCacheService
 {
   private readonly List<(Guid ProjectId, Widget Widget)> _projectWidgets = [];
-  private readonly ILogger<WidgetBucketService> _logger;
+  private readonly ILogger<EditorWidgetCacheService> _logger;
 
-  public WidgetBucketService(ILogger<WidgetBucketService> logger)
+  public EditorWidgetCacheService(ILogger<EditorWidgetCacheService> logger)
   {
     _logger = logger;
   }
@@ -47,6 +47,13 @@ public class WidgetBucketService
     var widget = _projectWidgets.FirstOrDefault(x => x.Widget.Id == widgetId).Widget;
     widget.Size = new Vector2(newWidth, newHeight);
     _logger.LogInformation("Updated widget {widgetId} size", widgetId);
+  }
+
+  public void UpdateWidgetFillColor(Guid widgetId, string hexColor)
+  {
+    var widget = _projectWidgets.FirstOrDefault(x => x.Widget.Id == widgetId).Widget;
+    widget.BackgroundColor = hexColor;
+    _logger.LogInformation("Updated widget {widgetId} fill color", widgetId);
   }
 
   public void RemoveWidget(Guid projectId, Guid widgetId) 

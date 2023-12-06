@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddDomainValidators();
 
-builder.Services.AddSingleton<WidgetBucketService>();
+builder.Services.AddSingleton<EditorWidgetCacheService>();
 
 builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents()
