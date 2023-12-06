@@ -84,15 +84,26 @@
                     resize: both;
                     overflow: auto;"
              draggable="true"
-             class="dropped-widget">
+             class="dropped-widget"
+             data-is-selected="false">
           @((MarkupString)(widget.Content ?? ""))
         </div>
       }
     }
   </div>
+  <div id="context-menu" class="hidden" data-hidden="true">
+    <div class="menu-btn">Change fill color</div>
+    <div class="menu-btn">Change border</div>
+    <div class="menu-btn">Delete</div>
+    <div class="menu-btn">About this widget</div>
+  </div>
 </div>
 
 <style>
+  .hidden {
+    display: none !important;
+  }
+
   .selected-widget {
     border: 1px dashed black;
   }

@@ -62,6 +62,7 @@ connection.start().then(() => {
 let urlParams = new URLSearchParams(window.location.search);
 let projectId = urlParams.get("projectId");
 let canvas = document.getElementById("canvas");
+let contextMenu = document.getElementById("context-menu");
 
 window.onbeforeunload = (e) => {
   connection.invoke("RemoveAllWidgetsFromWebProject", projectId).catch(error => {
@@ -88,6 +89,18 @@ const resizeObserver = new ResizeObserver(entries => {
 
 
 // JS Helper functions
+function handleWidgetFocus(event, element) {
+  if (element.dataset.isSelected == "true") {
+    element.blur();
+    element.classList.remove("selected-widget");
+    element.dataset.isSelected = false;
+  } else {
+    element.focus();
+    element.classList.add("selected-widget");
+    element.dataset.isSelected = true;
+  }
+}
+
 function createElementFromWidget(widgetData, event) {
   let newElement = document.createElement("div");
   let canvasRect = document.getElementById("canvas").getBoundingClientRect();
@@ -116,17 +129,7 @@ function createElementFromWidget(widgetData, event) {
   newElement.style.left = `${newPositionX}px`;
 
   newElement.dataset.isSelected = false;
-  newElement.addEventListener("click", (e) => {
-    if (newElement.dataset.isSelected == "true") {
-      newElement.blur();
-      newElement.classList.remove("selected-widget");
-      newElement.dataset.isSelected = false;
-    } else {
-      newElement.focus();
-      newElement.classList.add("selected-widget");
-      newElement.dataset.isSelected = true;
-    }
-  });
+  newElement.addEventListener("click", (e) => handleWidgetFocus(e, newElement));
 
   return newElement;
 }
@@ -223,6 +226,7 @@ function handleCanvasDrop(e) {
   return false;
 }
 
+
 export function initializeEventListeners() {
   console.log("initializing event listeners");
   document.querySelectorAll(".widget-preview").forEach(widget => {
@@ -230,9 +234,22 @@ export function initializeEventListeners() {
     widget.addEventListener("dragover", handleWidgetDragOver);
   });
 
-  document.querySelectorAll(".dropped-widget").forEach(element => {
-    element.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, element.id));
-    resizeObserver.observe(element);
+  document.querySelectorAll(".dropped-widget").forEach(widget => {
+    widget.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, widget.id));
+    resizeObserver.observe(widget);
+    widget.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      if (contextMenu.dataset.hidden === "true") {
+        contextMenu.style.top = `${e.clientY}px`;
+        contextMenu.style.left = `${e.clientX}px`;
+        contextMenu.classList.remove("hidden");
+        contextMenu.dataset.hidden = "false";
+      } else {
+        contextMenu.classList.add("hidden");
+        contextMenu.dataset.hidden = "true";
+      }
+    });
+    widget.addEventListener("click", (e) => handleWidgetFocus(e, widget));
   });
 
   document.addEventListener("keydown", (e) => {
@@ -259,12 +276,17 @@ export function initializeEventListeners() {
   canvas.addEventListener("drop", handleCanvasDrop);
   canvas.addEventListener("click", (e) => {
     if (e.target.id === canvas.id) {
+      //unfocus focused widget
       let currentWidgets = [...canvas.children];
       let currentlyFocusedWidgets = currentWidgets.filter(w => w.getAttribute("data-is-selected") === "true");
       currentlyFocusedWidgets.forEach(w => {
         w.setAttribute("data-is-selected", "false");
         w.classList.remove("selected-widget");
       });
+
+      // hide context menu if showing
+      contextMenu.classList.add("hidden");
+      contextMenu.dataset.hidden = "true";
     }
   });
 
