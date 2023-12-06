@@ -95,15 +95,30 @@ const resizeObserver = new ResizeObserver(entries => {
 
 
 // JS Helper functions
-function handleShowContextMenu(e) {
+function convertRgbToHex(rgb) {
+  if (rgb.startsWith("#")) return rgb;
+
+  let hexString = rgb.trim()
+    .substring(4, rgb.length - 1)
+    .split(", ")
+    .map(n => parseInt(n).toString(16))
+    .join("");
+
+  return "#" + hexString;
+}
+
+function handleShowContextMenu(e, element) {
   e.preventDefault();
   if (contextMenu.dataset.hidden === "true") {
+    console.log(`showing context menu: ${element.style.borderWidth.slice(0, -2) }`);
     contextMenu.style.top = `${e.clientY}px`;
     contextMenu.style.left = `${e.clientX}px`;
     contextMenu.classList.remove("hidden");
     contextMenu.dataset.hidden = "false";
     contextMenu.dataset.targetWidgetId = e.target.id;
-
+    fillColorInput.value = convertRgbToHex(element.style.backgroundColor);
+    borderColorInput.value = convertRgbToHex(element.style.borderColor);
+    borderThicknessInput.value = element.style.borderWidth.slice(0, -2);
   } else {
     contextMenu.classList.add("hidden");
     contextMenu.dataset.hidden = "true";
@@ -215,7 +230,7 @@ function handleCanvasDrop(e) {
     let newElement = createElementFromWidget(widgetData, e);
 
     newElement.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, newElement.id));
-    newElement.addEventListener("contextmenu", handleShowContextMenu);
+    newElement.addEventListener("contextmenu", (e) => handleShowContextMenu(e, newElement));
     resizeObserver.observe(newElement);
 
     if (connection != null) {
@@ -267,7 +282,7 @@ export function initializeEventListeners() {
   document.querySelectorAll(".dropped-widget").forEach(widget => {
     widget.addEventListener("dragstart", (e) => handleDroppedWidgetDragStart(e, widget.id));
     resizeObserver.observe(widget);
-    widget.addEventListener("contextmenu", handleShowContextMenu);
+    widget.addEventListener("contextmenu", (e) => handleShowContextMenu(e, widget));
     widget.addEventListener("click", (e) => handleWidgetFocus(e, widget));
   });
 
