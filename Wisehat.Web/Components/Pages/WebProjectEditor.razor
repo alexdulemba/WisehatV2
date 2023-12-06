@@ -12,7 +12,7 @@
 @inject ISender Sender
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
-@inject EditorWidgetCacheService WBS
+@inject EditorWidgetCacheService WidgetCache
 @layout EditorLayout
 @implements IAsyncDisposable
 
@@ -68,7 +68,7 @@
   <div id="canvas">
     @if (WebProject is not null && WebProject.Widgets.Count > 0)
     {
-      @foreach (var widget in WBS.GetWidgetsByProject(ProjectId))
+      @foreach (var widget in WidgetCache.GetWidgetsByProject(ProjectId))
       {
         var id = $"{widget.Type.ToString().ToLower()}_{widget.Id}";
         <div id="@(id)"
@@ -110,7 +110,7 @@
         <input type="number" id="widget-border-thickness-input" /> px
       </div>
      </div>
-    <div class="menu-btn" id="delete-btn">Delete</div>
+    <div class="menu-btn" id="widget-delete-btn">Delete</div>
   </div>
 </div>
 
@@ -120,7 +120,7 @@
   }
 
   .selected-widget {
-    border: 1px dashed black;
+    border: 1px dashed black !important;
   }
 </style>
 
@@ -137,7 +137,7 @@
 
   protected override async Task OnInitializedAsync()
   {
-    WBS.RemoveAllWidgetsForProject(ProjectId); // clear cache
+    WidgetCache.RemoveAllWidgetsForProject(ProjectId); // clear cache
 
     var query = new GetWebProject.Query(ProjectId);
     WebProject = await Sender.Send(query);
@@ -148,7 +148,7 @@
       return;
     }
     PreviousTitle = WebProject.Name;
-    WBS.AddWidgets(WebProject.Id, WebProject.Widgets);
+    WidgetCache.AddWidgets(WebProject.Id, WebProject.Widgets);
 
     _hubConnection = new HubConnectionBuilder()
         .WithUrl(NavigationManager.ToAbsoluteUri("/webprojects"))

@@ -24,11 +24,12 @@
   public DateTime LastModified { get; set; }
 
   [Parameter]
-  public Action ParentStateChanger { get; set; }
+  public required Action ParentStateChanger { get; set; }
 
   private async Task HandleEdit()
   {
     await JSRuntime.OpenInNewTabAsync($"/editor?projectId={ProjectId}");
+    LastModified = DateTime.Now;
   }
 
   private async void HandleDelete()

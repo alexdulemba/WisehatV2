@@ -199,6 +199,6 @@
   filter: none;
   cursor: initial;
 }
-#page-container > #context-menu > #delete-btn {
+#page-container > #context-menu > #widget-delete-btn {
   height: calc(20% - 8px);
 }

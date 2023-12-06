@@ -62,12 +62,14 @@ connection.start().then(() => {
 let urlParams = new URLSearchParams(window.location.search);
 let projectId = urlParams.get("projectId");
 let canvas = document.getElementById("canvas");
-let contextMenu = document.getElementById("context-menu");
 let saveIndicator = document.getElementById("save-indicator");
 
+let contextMenu = document.getElementById("context-menu");
 let fillColorInput = document.getElementById("widget-fill-color-input");
 let borderColorInput = document.getElementById("widget-border-color-input");
 let borderThicknessInput = document.getElementById("widget-border-thickness-input");
+let widgetDeleteButton = document.getElementById("widget-delete-btn");
+
 
 window.onbeforeunload = (e) => {
   connection.invoke("RemoveAllWidgetsFromWebProject", projectId).catch(error => {
@@ -87,7 +89,7 @@ const resizeObserver = new ResizeObserver(entries => {
           console.error(err.toString());
         });
       } else {
-        console.error("SignalR connection not initialized");
+        console.error("SignalR connection not initialized.");
       }
     }, 500);
   });
@@ -110,16 +112,17 @@ function convertRgbToHex(rgb) {
 function handleShowContextMenu(e, element) {
   e.preventDefault();
   if (contextMenu.dataset.hidden === "true") {
-    console.log(`showing context menu: ${element.style.borderWidth.slice(0, -2) }`);
     contextMenu.style.top = `${e.clientY}px`;
     contextMenu.style.left = `${e.clientX}px`;
     contextMenu.classList.remove("hidden");
     contextMenu.dataset.hidden = "false";
     contextMenu.dataset.targetWidgetId = e.target.id;
+
     fillColorInput.value = convertRgbToHex(element.style.backgroundColor);
     borderColorInput.value = convertRgbToHex(element.style.borderColor);
     borderThicknessInput.value = element.style.borderWidth.slice(0, -2);
-  } else {
+  }
+  else {
     contextMenu.classList.add("hidden");
     contextMenu.dataset.hidden = "true";
     contextMenu.dataset.targetWidgetId = "";
@@ -135,7 +138,8 @@ function handleWidgetFocus(event, element) {
     element.blur();
     element.classList.remove("selected-widget");
     element.dataset.isSelected = false;
-  } else {
+  }
+  else {
     element.focus();
     element.classList.add("selected-widget");
     element.dataset.isSelected = true;
@@ -286,26 +290,6 @@ export function initializeEventListeners() {
     widget.addEventListener("click", (e) => handleWidgetFocus(e, widget));
   });
 
-  document.addEventListener("keydown", (e) => {
-    if (e.code === "Delete") {
-      let currentWidgets = [...canvas.children];
-      let currentlyFocusedWidgets = currentWidgets.filter(w => w.getAttribute("data-is-selected") === "true");
-
-      if (connection != null) {
-        currentlyFocusedWidgets.forEach(w => {
-          let widgetGuid = parseWidgetGuid(w.id);
-          connection.invoke("RemoveWidgetFromWebProject", projectId, widgetGuid).catch((err) => {
-            return console.error(err.toString());
-          });
-          w.remove();
-        });
-      }
-      else {
-        alert("Internal error: Could not remove widget. Please try refreshing the page.");
-      }
-    }
-  });
-
   canvas.addEventListener("dragover", handleCanvasDragOver);
   canvas.addEventListener("drop", handleCanvasDrop);
   canvas.addEventListener("click", (e) => {
@@ -398,6 +382,26 @@ export function initializeEventListeners() {
     }
   }, false);
 
+  widgetDeleteButton.addEventListener("click", (e) => {
+    let targetWidgetId = contextMenu.dataset.targetWidgetId;
+    if (targetWidgetId != null && targetWidgetId.length > 0) {
+      let targetWidget = document.getElementById(targetWidgetId);
+
+      if (connection != null) {
+        let widgetGuid = parseWidgetGuid(targetWidgetId);
+        connection.invoke("RemoveWidgetFromWebProject", projectId, widgetGuid).catch((err) => {
+          console.error(`Unable to delete widget: ${err.toString()}`);
+        });
+        targetWidget.remove();
+        contextMenu.dataset.targetWidgetId = "";
+        contextMenu.classList.add("hidden");
+        saveIndicator.classList.remove("hidden");
+      }
+      else {
+        alert("Internal error: Could not remove widget. Please try refreshing the page.");
+      }
+    }
+  });
 
   saveIndicator.classList.add("hidden");
 }

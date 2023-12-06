@@ -49,7 +49,7 @@ public class MongoDatabaseService : IDatabaseService
 
   public async Task<bool> UpdateWebProjectAsync(WebProject project, CancellationToken token)
   {
-    _logger.LogInformation("Updating new web project {projectId}", project.Id);
+    _logger.LogInformation("Updating web project {projectId}", project.Id);
 
     //var options = new ReplaceOptions() { IsUpsert = true };
     var result = await _webProjects.ReplaceOneAsync(
@@ -65,10 +65,13 @@ public class MongoDatabaseService : IDatabaseService
     _logger.LogInformation("Updating web project {projectId} title to {newTitle}", projectId, newTitle);
 
     var filter = Builders<WebProject>.Filter.Eq(wp => wp.Id, projectId);
-    var update = Builders<WebProject>.Update.Set(wp => wp.Name, newTitle);
+    var updateTitle = Builders<WebProject>.Update.Set(wp => wp.Name, newTitle);
+    var updateTime = Builders<WebProject>.Update.Set(wp => wp.LastModified, DateTime.Now);
 
-    var result = await _webProjects.UpdateOneAsync(filter, update, cancellationToken: token);
-    return result.IsAcknowledged;
+    var titleUpdateResult = await _webProjects.UpdateOneAsync(filter, updateTitle, cancellationToken: token);
+    var timeUpdateResult = await _webProjects.UpdateOneAsync(filter, updateTime, cancellationToken: token);
+
+    return titleUpdateResult.IsAcknowledged && timeUpdateResult.IsAcknowledged;
   }
 
   public async Task<bool> UpdateWebProjectWidgetsAsync(Guid projectId, List<Widget> widgets, CancellationToken token)
@@ -76,10 +79,13 @@ public class MongoDatabaseService : IDatabaseService
     _logger.LogInformation("Updating widgets for project {projectId}", projectId);
 
     var filter = Builders<WebProject>.Filter.Eq(wp => wp.Id, projectId);
-    var update = Builders<WebProject>.Update.Set(wp => wp.Widgets, widgets);
+    var updateWigdets = Builders<WebProject>.Update.Set(wp => wp.Widgets, widgets);
+    var updateTime = Builders<WebProject>.Update.Set(wp => wp.LastModified, DateTime.Now);
 
-    var result = await _webProjects.UpdateOneAsync(filter, update, cancellationToken: token);
-    return result.IsAcknowledged;
+    var widgetsUpdateResult = await _webProjects.UpdateOneAsync(filter, updateWigdets, cancellationToken: token);
+    var timeUpdateResult = await _webProjects.UpdateOneAsync(filter, updateTime, cancellationToken: token);
+
+    return widgetsUpdateResult.IsAcknowledged && timeUpdateResult.IsAcknowledged;
   }
 
   public async Task<bool> DeleteWebProjectAsync(Guid projectId, CancellationToken token)

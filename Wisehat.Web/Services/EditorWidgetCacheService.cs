@@ -45,8 +45,11 @@ public class EditorWidgetCacheService
   public void UpdateWidgetSize(Guid widgetId, float newWidth, float newHeight)
   {
     var widget = _projectWidgets.FirstOrDefault(x => x.Widget.Id == widgetId).Widget;
-    widget.Size = new Vector2(newWidth, newHeight);
-    _logger.LogInformation("Updated widget {widgetId} size", widgetId);
+    if (widget != null) // ResizeObserver gets called when widget is deleted from canvas, thus calling this method when widget has been deleted already
+    {
+      widget.Size = new Vector2(newWidth, newHeight);
+      _logger.LogInformation("Updated widget {widgetId} size", widgetId);
+    }
   }
 
   public void UpdateWidgetFillColor(Guid widgetId, string hexColor)
