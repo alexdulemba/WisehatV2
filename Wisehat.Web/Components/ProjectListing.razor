@@ -2,6 +2,7 @@
 @using Wisehat.Domain.Commands.WebProjects
 @inject IJSRuntime JSRuntime
 @using MediatR
+@using Wisehat.Domain.Entities
 @inject ISender Sender
 
 <div class="project-listing-container">
@@ -24,7 +25,10 @@
   public DateTime LastModified { get; set; }
 
   [Parameter]
-  public required Action ParentStateChanger { get; set; }
+  public required EventCallback ParentStateChanger { get; set; }
+
+  [Parameter]
+  public required List<WebProject> WebProjects { get; set; }
 
   private async Task HandleEdit()
   {
@@ -42,7 +46,8 @@
       if (isDeleted)
       {
         await JSRuntime.AlertAsync($"Successfully deleted {ProjectName}");
-        ParentStateChanger.Invoke();
+        WebProjects.RemoveAll(wp => wp.Id == ProjectId);
+        await ParentStateChanger.InvokeAsync();
       }
       else
       {

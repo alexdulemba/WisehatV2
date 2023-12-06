@@ -27,7 +27,11 @@
     {
       foreach (var project in Projects)
       {
-        <ProjectListing ProjectId="@project.Id" ProjectName="@project.Name" LastModified="project.LastModified" ParentStateChanger="StateHasChanged"/>
+        <ProjectListing ProjectId="@project.Id" 
+                        ProjectName="@project.Name" 
+                        LastModified="@project.LastModified" 
+                        ParentStateChanger="@StateHasChanged"
+                        WebProjects="@Projects"/>
       }
     }
     else
@@ -73,8 +77,6 @@
         Projects = (await Sender.Send(query)).ToList();
       }
     }
-
-    await base.OnInitializedAsync();
   }
 
   private bool _showCreateModal = false;
