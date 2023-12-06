@@ -18,4 +18,9 @@ public static class Extensions
   {
     return jsRuntime.InvokeAsync<bool>("confirm", message);
   }
+
+  internal static ValueTask<IJSObjectReference> ImportModuleAsync(this IJSRuntime jsRuntime, string modulePath)
+  {
+    return jsRuntime.InvokeAsync<IJSObjectReference>("import", modulePath);
+  }
 }

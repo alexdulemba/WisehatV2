@@ -19,7 +19,7 @@
 <PageTitle>Page Editor</PageTitle>
 
 <SectionContent SectionName="project-title">
-  <input type="text" placeholder="@PreviousTitle" id="title" @bind-value="@NewTitle" @onfocusout="HandleTitleChange" />
+  <input type="text" placeholder="@PreviousTitle" id="title" @bind-value="@NewTitle" @onfocusout="HandleCrossTabTitleChange" />
 </SectionContent>
 
 <div id="page-container">
@@ -118,7 +118,7 @@
 
     if (WebProject is null)
     {
-      await JSRuntime.AlertAsync("Web Project data not found. Please close this tab and try again.");
+      await JSRuntime.AlertAsync("Project data not found. Please close this tab and try again.");
       return;
     }
     PreviousTitle = WebProject.Name;
@@ -139,19 +139,18 @@
 
     await _hubConnection.StartAsync();
     await _hubConnection.SendAsync("JoinWebProjectGroup", ProjectId);
-    Debug.WriteLine($"Widget count: {WebProject.Widgets.Count}");
   }
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
-    _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/WebProjectEditor.razor.js");
+    _jsModule = await JSRuntime.ImportModuleAsync("./Components/Pages/WebProjectEditor.razor.js");
     if (!firstRender)
     {
       await _jsModule.InvokeVoidAsync("initializeEventListeners");
     }
   }
 
-  internal async Task HandleTitleChange(FocusEventArgs args)
+  internal async Task HandleCrossTabTitleChange(FocusEventArgs args)
   {
     if (!string.IsNullOrEmpty(NewTitle))
     {
@@ -159,7 +158,7 @@
       var success = await Sender.Send(command);
 
       if (_hubConnection is not null && success is true)
-        await _hubConnection.SendAsync("UpdateWebProjectTitle", ProjectId, NewTitle);
+        await _hubConnection.SendAsync(nameof(WebProjectHub.UpdateWebProjectTitle), ProjectId, NewTitle);
     }
   }
 
@@ -171,8 +170,6 @@
 
   public async ValueTask DisposeAsync()
   {
-    WBS.RemoveAllWidgetsForProject(ProjectId);
-
     if (_hubConnection is not null)
       await _hubConnection.DisposeAsync();
   }

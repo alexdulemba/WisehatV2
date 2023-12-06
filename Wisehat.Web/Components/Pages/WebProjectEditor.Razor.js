@@ -47,7 +47,9 @@ window.Widget = Widget;
 
 
 // SignalR setup
-var connection = new signalR.HubConnectionBuilder().withUrl("/webprojects").build();
+const connection = new signalR.HubConnectionBuilder().withUrl("/webprojects").build();
+connection.onclose(error => alert("Editor connection closed. Try refreshing the page."));
+
 let saveButton = document.getElementById("save-btn");
 saveButton.disabled = true;
 
@@ -57,10 +59,15 @@ connection.start().then(() => {
   return console.error(err.toString());
 });
 
-
 let urlParams = new URLSearchParams(window.location.search);
 let projectId = urlParams.get("projectId");
 let canvas = document.getElementById("canvas");
+
+window.onbeforeunload = (e) => {
+  connection.invoke("RemoveAllWidgetsFromWebProject", projectId).catch(error => {
+    console.error(error.toString());
+  });
+};
 
 let resizeObserverEntries = {};
 const resizeObserver = new ResizeObserver(entries => {
