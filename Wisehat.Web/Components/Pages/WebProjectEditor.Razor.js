@@ -63,6 +63,7 @@ let urlParams = new URLSearchParams(window.location.search);
 let projectId = urlParams.get("projectId");
 let canvas = document.getElementById("canvas");
 let contextMenu = document.getElementById("context-menu");
+let saveIndicator = document.getElementById("save-indicator");
 
 window.onbeforeunload = (e) => {
   connection.invoke("RemoveAllWidgetsFromWebProject", projectId).catch(error => {
@@ -76,8 +77,9 @@ const resizeObserver = new ResizeObserver(entries => {
     let timeoutId = resizeObserverEntries[entry.target.id];
     clearTimeout(timeoutId);
     resizeObserverEntries[entry.target.id] = setTimeout(() => {
+      saveIndicator.classList.remove("hidden");
       if (connection != null) {
-        connection.invoke("UpdateWidgetSize", entry.target.id.split("_").pop(), entry.contentRect.width, entry.contentRect.height).catch(err => {
+        connection.invoke("UpdateWidgetSize", parseWidgetGuid(entry.target.id), entry.contentRect.width, entry.contentRect.height).catch(err => {
           console.error(err.toString());
         });
       } else {
@@ -217,6 +219,7 @@ function handleCanvasDrop(e) {
       });
     }
     e.target.appendChild(newElement);
+    saveIndicator.classList.remove("hidden");
   }
   else {
     let json = e.dataTransfer.getData("grabPosition");
@@ -237,6 +240,7 @@ function handleCanvasDrop(e) {
           return console.error(err.toString());
         });
       }
+      saveIndicator.classList.remove("hidden");
     }
     else {
       console.error("no drag data received");
@@ -249,6 +253,7 @@ function handleCanvasDrop(e) {
 
 export function initializeEventListeners() {
   console.log("initializing event listeners");
+  saveIndicator.classList.add("hidden");
 
   document.querySelectorAll(".widget-preview").forEach(widget => {
     widget.addEventListener("dragstart", (e) => handleWidgetDragStart(e, widget));
@@ -306,8 +311,20 @@ export function initializeEventListeners() {
         console.error(err.toString());
       });
       canvas.replaceChildren();
+
+      saveIndicator.classList.remove("hidden");
     } else {
       console.error("SignalR connection not initialized");
+    }
+  });
+
+  document.getElementById("save-btn").addEventListener("click", (e) => {
+    if (connection != null) {
+      connection.invoke("SaveWebProjectAsync", projectId).then((value) => {
+        saveIndicator.classList.add("hidden");
+      }).catch(err => {
+        console.error(err.toString());
+      });
     }
   });
 
@@ -316,6 +333,8 @@ export function initializeEventListeners() {
     if (targetWidgetId != null && targetWidgetId.length > 0) {
       let targetWidget = document.getElementById(targetWidgetId);
       targetWidget.style.backgroundColor = e.target.value;
+
+      saveIndicator.classList.remove("hidden");
 
       if (connection != null) {
         let widgetGuid = parseWidgetGuid(targetWidgetId);

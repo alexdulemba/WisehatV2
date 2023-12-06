@@ -52,6 +52,9 @@
 #page-container > #widget-options-menu > #save-btn > svg {
   fill: rgb(43, 69, 112);
 }
+#page-container > #widget-options-menu > #save-btn > #save-indicator {
+  transform: scale(0.8);
+}
 #page-container > #widget-options-menu > #clear-canvas-btn {
   margin-right: 8px;
   cursor: pointer;
