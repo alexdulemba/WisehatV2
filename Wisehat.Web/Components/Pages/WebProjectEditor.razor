@@ -78,7 +78,7 @@
                     width: @(widget.Size.X)px;
                     height: @(widget.Size.Y)px;
                     border-radius: 4px;
-                    border-color: @widget.BorderColor;
+                    border: @widget.Border;
                     background-color: @widget.BackgroundColor;
                     display: flex;
                     justify-content: center;
@@ -96,12 +96,21 @@
   </div>
   <div id="context-menu" class="hidden" data-hidden="true">
     <div class="menu-btn" id="fill-color-container">
-      Change fill color: 
-      <input type="color" value="#e49273ff" id="widget-fill-color-input" />
+      Fill color: 
+      <input type="color" value="#e49273" id="widget-fill-color-input" />
     </div>
-    <div class="menu-btn">Change border</div>
-    <div class="menu-btn">Delete</div>
-    <div class="menu-btn">About this widget</div>
+    <div class="menu-btn" id="border-style-container">
+      Border Properties
+      <div>
+        Color: 
+        <input type="color" value="" id="widget-border-color-input" />
+      </div>
+      <div id="border-thickness-style-container">
+        Thickness:
+        <input type="number" value="" id="widget-border-thickness-input" /> px
+      </div>
+     </div>
+    <div class="menu-btn" id="delete-btn">Delete</div>
   </div>
 </div>
 

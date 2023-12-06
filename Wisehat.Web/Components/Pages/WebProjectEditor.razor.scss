@@ -170,11 +170,10 @@
     justify-content: flex-start;
     align-items: center;
     width: 188px;
-    height: 148px;
+    height: 188px;
 
     > .menu-btn {
       padding: 4px;
-      height: calc(25% - 8px);
       width: calc(100% - 8px);
       border-bottom: 1px solid $glaucous;
       display: flex;
@@ -199,6 +198,45 @@
       &:hover {
         filter: brightness(0.8);
       }
+    }
+
+    > #fill-color-container {
+      height: calc(25% - 8px);
+
+      &:hover {
+        filter: none;
+        cursor: initial;
+      }
+    }
+
+    > #border-style-container {
+      height: calc(55% - 8px);
+      flex-direction: column;
+      align-items: flex-start;
+
+      > div {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      > #border-thickness-style-container {
+
+        > input {
+          width: 25%;
+          margin-left: 30px;
+        }
+      }
+
+      &:hover {
+        filter: none;
+        cursor: initial;
+      }
+    }
+
+    > #delete-btn {
+      height: calc(20% - 8px);
     }
   }
 }

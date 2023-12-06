@@ -9,13 +9,13 @@ namespace Wisehat.Web.Hubs;
 
 public class WebProjectHub : Hub<IWebProjectCommands>
 {
-  private readonly EditorWidgetCacheService _widgetBucketService;
+  private readonly EditorWidgetCacheService _widgetCache;
   private readonly ISender _sender;
   private readonly ILogger<WebProjectHub> _logger;
 
-  public WebProjectHub(EditorWidgetCacheService widgetBucketService, ISender sender, ILogger<WebProjectHub> logger)
+  public WebProjectHub(EditorWidgetCacheService widgetCache, ISender sender, ILogger<WebProjectHub> logger)
   {
-    _widgetBucketService = widgetBucketService;
+    _widgetCache = widgetCache;
     _sender = sender;
     _logger = logger;
   }
@@ -42,42 +42,48 @@ public class WebProjectHub : Hub<IWebProjectCommands>
   public void AddWidgetToWebProject(Guid projectId, Widget widget)
   {
     _logger.LogInformation("Received widget {widgetId} for project {projectId}", widget.Id, projectId);
-    _widgetBucketService.AddWidget(projectId, widget);
+    _widgetCache.AddWidget(projectId, widget);
   }
 
   public void UpdateWidgetPosition(Guid widgetId, float positionX, float positionY)
   {
     _logger.LogInformation("Updating stored widget position");
-    _widgetBucketService.UpdateWidgetPosition(widgetId, positionX, positionY);
+    _widgetCache.UpdateWidgetPosition(widgetId, positionX, positionY);
   }
 
   public void UpdateWidgetSize(Guid widgetId, float newWidth, float newHeight)
   {
     _logger.LogInformation("Updating stored widget size");
-    _widgetBucketService.UpdateWidgetSize(widgetId, newWidth, newHeight);
+    _widgetCache.UpdateWidgetSize(widgetId, newWidth, newHeight);
   }
 
   public void UpdateWidgetFillColor(Guid widgetId, string hexColor)
   {
     _logger.LogInformation("Updating stored widget fill color");
-    _widgetBucketService.UpdateWidgetFillColor(widgetId, hexColor);
+    _widgetCache.UpdateWidgetFillColor(widgetId, hexColor);
+  }
+
+  public void UpdateWidgetBorder(Guid widgetId, string borderValue)
+  {
+    _logger.LogInformation("Updating stored widget border");
+    _widgetCache.UpdateWidgetBorder(widgetId, borderValue);
   }
 
   public void RemoveWidgetFromWebProject(Guid projectId, Guid widgetId)
   {
     _logger.LogInformation("Removing widget {widgetId} from project {projectId}", widgetId, projectId);
-    _widgetBucketService.RemoveWidget(projectId, widgetId);
+    _widgetCache.RemoveWidget(projectId, widgetId);
   }
 
   public void RemoveAllWidgetsFromWebProject(Guid projectId)
   {
     _logger.LogInformation("Removing all widgets from project {projectId}", projectId);
-    _widgetBucketService.RemoveAllWidgetsForProject(projectId);
+    _widgetCache.RemoveAllWidgetsForProject(projectId);
   }
 
   public async Task SaveWebProjectAsync(Guid projectId)
   {
-    var widgets = _widgetBucketService.GetWidgetsByProject(projectId);
+    var widgets = _widgetCache.GetWidgetsByProject(projectId);
     var command = new UpdateWebProjectWidgets.Command(projectId, widgets);
     var success = await _sender.Send(command);
     _logger.LogInformation("Widgets data {result}", success ? "saved successfully" : "failed to save");

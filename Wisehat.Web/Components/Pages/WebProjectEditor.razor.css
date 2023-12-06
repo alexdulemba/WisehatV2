@@ -148,11 +148,10 @@
   justify-content: flex-start;
   align-items: center;
   width: 188px;
-  height: 148px;
+  height: 188px;
 }
 #page-container > #context-menu > .menu-btn {
   padding: 4px;
-  height: calc(25% - 8px);
   width: calc(100% - 8px);
   border-bottom: 1px solid rgb(113, 128, 172);
   display: flex;
@@ -173,4 +172,33 @@
 }
 #page-container > #context-menu > .menu-btn:hover {
   filter: brightness(0.8);
+}
+#page-container > #context-menu > #fill-color-container {
+  height: calc(25% - 8px);
+}
+#page-container > #context-menu > #fill-color-container:hover {
+  filter: none;
+  cursor: initial;
+}
+#page-container > #context-menu > #border-style-container {
+  height: calc(55% - 8px);
+  flex-direction: column;
+  align-items: flex-start;
+}
+#page-container > #context-menu > #border-style-container > div {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#page-container > #context-menu > #border-style-container > #border-thickness-style-container > input {
+  width: 25%;
+  margin-left: 30px;
+}
+#page-container > #context-menu > #border-style-container:hover {
+  filter: none;
+  cursor: initial;
+}
+#page-container > #context-menu > #delete-btn {
+  height: calc(20% - 8px);
 }

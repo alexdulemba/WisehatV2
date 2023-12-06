@@ -22,7 +22,7 @@ public class Widget
 
   public string BackgroundColor { get; set; } = "#252525";
 
-  public string BorderColor { get; set; } = "#252525";
+  public string Border { get; set; } = "1px solid #252525";
 
   [JsonConverter(typeof(JsonVector2Converter))]
   public Vector2 Position { get; set; }

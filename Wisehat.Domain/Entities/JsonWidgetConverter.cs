@@ -58,7 +58,7 @@ public class JsonWidgetConverter : JsonConverter<Widget>
       Size = properties["size"].ToVector2(),
       Content = properties["content"].ToString(),
       BackgroundColor = properties["backgroundcolor"].ToString()!,
-      BorderColor = properties["bordercolor"].ToString()!,
+      Border = properties["bordercolor"].ToString()!,
       Position = properties["position"].ToVector2(),
     };
   }
@@ -97,7 +97,7 @@ public class JsonWidgetConverter : JsonConverter<Widget>
     writer.WriteStringValue(value.BackgroundColor);
 
     writer.WritePropertyName("BorderColor");
-    writer.WriteStringValue(value.BorderColor);
+    writer.WriteStringValue(value.Border);
 
     writer.WriteStartObject("Location");
     writer.WritePropertyName("X");

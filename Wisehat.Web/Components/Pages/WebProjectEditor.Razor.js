@@ -65,6 +65,10 @@ let canvas = document.getElementById("canvas");
 let contextMenu = document.getElementById("context-menu");
 let saveIndicator = document.getElementById("save-indicator");
 
+let fillColorInput = document.getElementById("widget-fill-color-input");
+let borderColorInput = document.getElementById("widget-border-color-input");
+let borderThicknessInput = document.getElementById("widget-border-thickness-input");
+
 window.onbeforeunload = (e) => {
   connection.invoke("RemoveAllWidgetsFromWebProject", projectId).catch(error => {
     console.error(error.toString());
@@ -99,6 +103,7 @@ function handleShowContextMenu(e) {
     contextMenu.classList.remove("hidden");
     contextMenu.dataset.hidden = "false";
     contextMenu.dataset.targetWidgetId = e.target.id;
+
   } else {
     contextMenu.classList.add("hidden");
     contextMenu.dataset.hidden = "true";
@@ -253,7 +258,6 @@ function handleCanvasDrop(e) {
 
 export function initializeEventListeners() {
   console.log("initializing event listeners");
-  saveIndicator.classList.add("hidden");
 
   document.querySelectorAll(".widget-preview").forEach(widget => {
     widget.addEventListener("dragstart", (e) => handleWidgetDragStart(e, widget));
@@ -328,7 +332,7 @@ export function initializeEventListeners() {
     }
   });
 
-  document.getElementById("widget-fill-color-input").addEventListener("change", (e) => {
+  fillColorInput.addEventListener("change", (e) => {
     let targetWidgetId = contextMenu.dataset.targetWidgetId;
     if (targetWidgetId != null && targetWidgetId.length > 0) {
       let targetWidget = document.getElementById(targetWidgetId);
@@ -343,6 +347,42 @@ export function initializeEventListeners() {
         });
       }
     }
-
   }, false);
+
+  borderColorInput.addEventListener("change", (e) => {
+    let targetWidgetId = contextMenu.dataset.targetWidgetId;
+    if (targetWidgetId != null && targetWidgetId.length > 0) {
+      let targetWidget = document.getElementById(targetWidgetId);
+      targetWidget.style.border = `${borderThicknessInput.value}px solid ${e.target.value}`;
+
+      saveIndicator.classList.remove("hidden");
+
+      if (connection != null) {
+        let widgetGuid = parseWidgetGuid(targetWidgetId);
+        connection.invoke("UpdateWidgetBorder", widgetGuid, `${borderThicknessInput.value}px solid ${e.target.value}`).catch(err => {
+          console.error(`Couldn't update widget border color: ${err.toString()}`);
+        });
+      }
+    }
+  }, false);
+
+  borderThicknessInput.addEventListener("change", (e) => {
+    let targetWidgetId = contextMenu.dataset.targetWidgetId;
+    if (targetWidgetId != null && targetWidgetId.length > 0) {
+      let targetWidget = document.getElementById(targetWidgetId);
+      targetWidget.style.border = `${e.target.value}px solid ${borderColorInput.value}`;
+
+      saveIndicator.classList.remove("hidden");
+
+      if (connection != null) {
+        let widgetGuid = parseWidgetGuid(targetWidgetId);
+        connection.invoke("UpdateWidgetBorder", widgetGuid, `${e.target.value}px solid ${borderColorInput.value}`).catch(err => {
+          console.error(`Couldn't update widget border thickness: ${err.toString()}`);
+        });
+      }
+    }
+  }, false);
+
+
+  saveIndicator.classList.add("hidden");
 }
