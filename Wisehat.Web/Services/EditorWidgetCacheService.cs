@@ -1,4 +1,7 @@
-﻿using System.Numerics;
+﻿// Author: Alexander Dulemba
+// Copyright 2023
+
+using System.Numerics;
 using Wisehat.Domain.Entities;
 
 namespace Wisehat.Web.Services;

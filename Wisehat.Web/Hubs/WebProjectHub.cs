@@ -1,6 +1,10 @@
-﻿using MediatR;
+﻿// Author: Alexander Dulemba
+// Copyright 2023
+
+// Code designed based on SignalR tutorial from Microsoft: https://learn.microsoft.com/en-us/aspnet/core/blazor/tutorials/signalr-blazor?view=aspnetcore-8.0&tabs=visual-studio
+
+using MediatR;
 using Microsoft.AspNetCore.SignalR;
-using System.Diagnostics;
 using Wisehat.Domain.Commands.WebProjects;
 using Wisehat.Domain.Entities;
 using Wisehat.Web.Services;

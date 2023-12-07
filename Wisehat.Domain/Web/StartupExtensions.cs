@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿// Author: Alexander Dulemba
+// Copyright 2023
+
+using FluentValidation;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Wisehat.Domain.Infrastructure;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using FluentValidation;
-using Wisehat.Domain.Entities;
 using Wisehat.Domain.Validators;
 
 namespace Wisehat.Domain.Web;

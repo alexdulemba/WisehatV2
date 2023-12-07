@@ -1,4 +1,7 @@
-﻿using System.Numerics;
+﻿// Author: Alexander Dulemba
+// Copyright 2023
+
+using System.Numerics;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;

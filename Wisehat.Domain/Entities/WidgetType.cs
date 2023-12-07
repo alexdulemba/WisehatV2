@@ -1,10 +1,12 @@
-﻿namespace Wisehat.Domain.Entities
+﻿// Author: Alexander Dulemba
+// Copyright 2023
+
+namespace Wisehat.Domain.Entities;
+
+public enum WidgetType
 {
-  public enum WidgetType
-  {
-    TextBox,
-    ImageBox,
-    VideoBox,
-    FillBox
-  }
+  TextBox,
+  ImageBox,
+  VideoBox,
+  FillBox
 }

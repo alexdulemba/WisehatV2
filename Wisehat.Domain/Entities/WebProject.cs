@@ -1,4 +1,7 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿// Author: Alexander Dulemba
+// Copyright 2023
+
+using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
 
 namespace Wisehat.Domain.Entities;

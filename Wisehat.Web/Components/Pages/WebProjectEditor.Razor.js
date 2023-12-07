@@ -1,4 +1,7 @@
-﻿import { v4 as uuid } from 'https://jspm.dev/uuid';
+﻿// Author: Alexander Dulemba
+// Copyright 2023
+
+import { v4 as uuid } from 'https://jspm.dev/uuid';
 
 class Theme {
   static glaucousHEX = '#7180acff';
@@ -47,6 +50,7 @@ window.Widget = Widget;
 
 
 // SignalR setup
+// Following Microsoft tutorial: https://learn.microsoft.com/en-us/aspnet/core/blazor/tutorials/signalr-blazor?view=aspnetcore-8.0&tabs=visual-studio
 const connection = new signalR.HubConnectionBuilder().withUrl("/webprojects").build();
 connection.onclose(error => alert("Editor connection closed. Try refreshing the page."));
 
@@ -77,6 +81,7 @@ window.onbeforeunload = (e) => {
   });
 };
 
+// Use ResizeObserver API to listen for widget element resizes: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
 let resizeObserverEntries = {};
 const resizeObserver = new ResizeObserver(entries => {
   entries.forEach(entry => {
@@ -88,7 +93,8 @@ const resizeObserver = new ResizeObserver(entries => {
         connection.invoke("UpdateWidgetSize", parseWidgetGuid(entry.target.id), entry.contentRect.width, entry.contentRect.height).catch(err => {
           console.error(err.toString());
         });
-      } else {
+      }
+      else {
         console.error("SignalR connection not initialized.");
       }
     }, 500);
@@ -96,7 +102,9 @@ const resizeObserver = new ResizeObserver(entries => {
 });
 
 
-// JS Helper functions
+// Custom JS Helper functions
+
+// this method is dervied from StackOverflow: https://stackoverflow.com/questions/1740700/how-to-get-hex-color-value-rather-than-rgb-value
 function convertRgbToHex(rgb) {
   if (rgb.startsWith("#")) return rgb;
 
@@ -179,6 +187,9 @@ function createElementFromWidget(widgetData, event) {
   return newElement;
 }
 
+// calculations for mouse grab position derived from here: https://stackoverflow.com/questions/3234256/find-mouse-position-relative-to-element
+// dragging code dervied from MDN: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drag_event
+// and web.dev: https://web.dev/articles/drag-and-drop
 function handleWidgetDragStart(event, element) {
   let widgetType = element.dataset.widgetType;
   let styles = element.computedStyleMap();
@@ -215,16 +226,19 @@ function handleDroppedWidgetDragStart(event, elementId) {
   event.dataTransfer.setData("grabPosition", json);
 }
 
+// Derived from web.dev: https://web.dev/articles/drag-and-drop
 function handleWidgetDragOver(e) {
   e.preventDefault();
   return false;
 }
 
+// Derived from web.dev: https://web.dev/articles/drag-and-drop
 function handleCanvasDragOver(e) {
   e.preventDefault();
   return false;
 }
 
+// Derived from web.dev: https://web.dev/articles/drag-and-drop
 function handleCanvasDrop(e) {
   e.stopPropagation();
 

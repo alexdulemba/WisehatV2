@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿// Author: Alexander Dulemba
+// Copyright 2023
+
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using Wisehat.Domain.Entities;

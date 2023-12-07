@@ -1,4 +1,7 @@
-﻿using FluentValidation;
+﻿// Author: Alexander Dulemba
+// Copyright 2023
+
+using FluentValidation;
 using MediatR;
 using Wisehat.Domain.Entities;
 using Wisehat.Domain.Infrastructure;

@@ -1,3 +1,6 @@
+// Author: Alexander Dulemba
+// Copyright 2023
+
 using Auth0.AspNetCore.Authentication;
 using Microsoft.FeatureManagement;
 using Wisehat.Web.Components;

@@ -1,4 +1,7 @@
-﻿using System.Numerics;
+﻿// Author: Alexander Dulemba
+// Copyright 2023
+
+using System.Numerics;
 
 namespace Wisehat.Domain.Entities;
 
@@ -8,7 +11,8 @@ public static class Extensions
   {
     ArgumentNullException.ThrowIfNull(obj);
 
-    if (obj is not Vector2) throw new ArgumentException(nameof(obj));
+    if (obj is not Vector2) 
+      throw new ArgumentException("Failed to convert object to Vector2 since underlying type is not Vector2");
 
     return (Vector2)obj;
   }

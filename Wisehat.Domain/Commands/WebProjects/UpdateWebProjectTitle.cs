@@ -1,4 +1,7 @@
-﻿using MediatR;
+﻿// Author: Alexander Dulemba
+// Copyright 2023
+
+using MediatR;
 using Wisehat.Domain.Infrastructure;
 
 namespace Wisehat.Domain.Commands.WebProjects;

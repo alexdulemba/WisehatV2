@@ -1,4 +1,7 @@
-﻿using Wisehat.Domain.Entities;
+﻿// Author: Alexander Dulemba
+// Copyright 2023
+
+using Wisehat.Domain.Entities;
 
 namespace Wisehat.Domain.Infrastructure;
 
