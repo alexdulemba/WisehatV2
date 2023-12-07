@@ -1,5 +1,4 @@
 {
-  "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
     "http": {
       "commandName": "Project",
@@ -24,18 +23,22 @@
       "sslPort": 8001
     },
     "IIS Express": {
-      "commandName": "IISExpress",
+      "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "sslPort": 8001,
+      "useSSL": true,
+      "applicationUrl": "https://localhost:8001/"
     }
   },
+  "$schema": "http://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "windowsAuthentication": false,
-    "anonymousAuthentication": true,
+    "anonymousAuthentication": false,
     "iisExpress": {
-      "applicationUrl": "http://localhost:8000",
+      "applicationUrl": "https://localhost:8001",
       "sslPort": 8001
     }
   }
