@@ -1,6 +1,11 @@
 ﻿// Author: Alexander Dulemba
 // Copyright 2023
 
+// Certain values on front-end, like Widget position, come in JSON form
+// that are not natively deserialized into .NET structures like Vector2.
+// Thus, a custom serializer for Widget and Vector2 need to be created.
+// Derived from Microsoft tutorial: https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/converters-how-to?pivots=dotnet-8-0
+
 using System.Numerics;
 using System.Reflection;
 using System.Text.Json;
