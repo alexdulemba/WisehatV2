@@ -1,5 +1,6 @@
 ﻿// Author: Alexander Dulemba
 // Copyright 2023
+// Derived from MongoDB docs: https://www.mongodb.com/docs/drivers/csharp/current/
 
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
