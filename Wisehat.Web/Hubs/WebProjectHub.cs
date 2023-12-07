@@ -73,6 +73,12 @@ public class WebProjectHub : Hub<IWebProjectCommands>
     _widgetCache.UpdateWidgetBorder(widgetId, borderValue);
   }
 
+  public void UpdateWidgetContent(Guid widgetId, string content)
+  {
+    _logger.LogInformation("Updating stored widget content");
+    _widgetCache.UpdateWidgetContent(widgetId, content);
+  }
+
   public void RemoveWidgetFromWebProject(Guid projectId, Guid widgetId)
   {
     _logger.LogInformation("Removing widget {widgetId} from project {projectId}", widgetId, projectId);

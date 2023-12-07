@@ -52,7 +52,8 @@
       <div class="widget-preview-container">
         <h2>Text box</h2>
         <div id="textbox-widget" class="widget-preview" draggable="true" data-widget-type="textbox">
-          <div>Sample Text</div>
+          @* <div>Sample Text</div> *@
+          Sample Text
         </div>
       </div>
       <div class="widget-preview-container">
@@ -116,6 +117,19 @@
       </div>
      </div>
     <div class="menu-btn" id="widget-delete-btn">Delete</div>
+    <div class="menu-btn" id="widget-change-content-btn">Change Content</div>
+  </div>
+  <div id="edit-widget-content-modal-backdrop" class="hidden">
+    <div id="edit-widget-content-modal">
+      <h2 id="modal-title">Edit Textbox</h2>
+      <div id="content-input-container">
+        <input id="modal-input" type="text" required autocomplete="off" />
+      </div>
+      <div id="modal-btns">
+        <button type="button" id="cancel-content-changes-btn">Cancel</button>
+        <button type="button" id="save-content-changes-btn">Save</button>
+      </div>
+    </div>
   </div>
 </div>
 

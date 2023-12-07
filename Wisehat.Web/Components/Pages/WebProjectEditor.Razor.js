@@ -73,7 +73,12 @@ let fillColorInput = document.getElementById("widget-fill-color-input");
 let borderColorInput = document.getElementById("widget-border-color-input");
 let borderThicknessInput = document.getElementById("widget-border-thickness-input");
 let widgetDeleteButton = document.getElementById("widget-delete-btn");
-
+let changeWidgetContentButton = document.getElementById("widget-change-content-btn");
+let changeWidgetContentModal = document.getElementById("edit-widget-content-modal-backdrop");
+let widgetContentModalTitle = document.getElementById("modal-title");
+let widgetContentModalInput = document.getElementById("modal-input");
+let saveContentChangesButton = document.getElementById("save-content-changes-btn");
+let cancelContentChangesButton = document.getElementById("cancel-content-changes-btn");
 
 window.onbeforeunload = (e) => {
   connection.invoke("RemoveAllWidgetsFromWebProject", projectId).catch(error => {
@@ -415,6 +420,67 @@ export function initializeEventListeners() {
         alert("Internal error: Could not remove widget. Please try refreshing the page.");
       }
     }
+  });
+
+  changeWidgetContentButton.addEventListener("click", (e) => {
+    let targetWidgetId = contextMenu.dataset.targetWidgetId;
+    let targetWidgetType = targetWidgetId.split("_")[0].toLowerCase();
+
+    if (targetWidgetType === "fillbox") {
+      // do nothing
+    }
+    else if (targetWidgetType === "textbox") {
+      widgetContentModalTitle.innerText = "Edit Textbox"
+      widgetContentModalInput.value = document.getElementById(targetWidgetId).innerText;
+      changeWidgetContentModal.classList.remove("hidden");
+    }
+    else if (targetWidgetType === "imagebox") {
+      // open the file upload dialog
+    }
+    else if (targetWidgetType === "videobox") {
+      widgetContentModalTitle.innerText = "Edit Videobox";
+      widgetContentModalInput.setAttribute("placeholder", "Insert Link");
+      changeWidgetContentModal.classList.remove("hidden");
+    }
+    else {
+      console.error("Invalid widget type");
+    }
+  });
+
+  saveContentChangesButton.addEventListener("click", (e) => {
+    let newValue = widgetContentModalInput.value;
+    let targetWidgetId = contextMenu.dataset.targetWidgetId;
+    let targetWidgetType = targetWidgetId.split("_")[0].toLowerCase();
+
+    if (targetWidgetType === "textbox") {
+      document.getElementById(targetWidgetId).innerText = newValue;
+      if (connection != null) {
+        connection.invoke("UpdateWidgetContent", parseWidgetGuid(targetWidgetId), newValue).catch(err => {
+          console.error(err.ToString());
+        });
+      }
+    }
+    else if (targetWidgetType === "imagebox") {
+      // open the file upload dialog
+    }
+    else if (targetWidgetType === "videobox") {
+      document.getElementById(targetWidgetId).children[0].setAttribute("src", newValue);
+      let updatedInnerElement = document.getElementById(targetWidgetId).children[0].outerHTML;
+      if (connection != null) {
+        connection.invoke("UpdateWidgetContent", parseWidgetGuid(targetWidgetId), updatedInnerElement).catch(err => {
+          console.error(err.ToString());
+        });
+      }
+    }
+    else {
+      console.error("Invalid widget type");
+    }
+
+    changeWidgetContentModal.classList.add("hidden");
+  });
+
+  cancelContentChangesButton.addEventListener("click", (e) => {
+    changeWidgetContentModal.classList.add("hidden");
   });
 
   saveIndicator.classList.add("hidden");

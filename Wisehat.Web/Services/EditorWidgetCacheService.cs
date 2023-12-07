@@ -69,6 +69,13 @@ public class EditorWidgetCacheService
     _logger.LogInformation("Updated widget {widgetId} border", widgetId);
   }
 
+  public void UpdateWidgetContent(Guid widgetId, string content)
+  {
+    var widget = _projectWidgets.FirstOrDefault(x => x.Widget.Id == widgetId).Widget;
+    widget.Content = content;
+    _logger.LogInformation("Updated widget {widgetId} content", widgetId);
+  }
+
   public void RemoveWidget(Guid projectId, Guid widgetId) 
   { 
     var widget = _projectWidgets.FirstOrDefault(x => x.Widget.Id == widgetId);

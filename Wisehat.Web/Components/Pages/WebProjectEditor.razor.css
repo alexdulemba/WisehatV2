@@ -148,7 +148,7 @@
   justify-content: flex-start;
   align-items: center;
   width: 188px;
-  height: 188px;
+  height: 212px;
 }
 #page-container > #context-menu > .menu-btn {
   padding: 4px;
@@ -201,4 +201,81 @@
 }
 #page-container > #context-menu > #widget-delete-btn {
   height: calc(20% - 8px);
+}
+#page-container > #edit-widget-content-modal-backdrop {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4));
+  z-index: 100;
+}
+#page-container > #edit-widget-content-modal-backdrop > #edit-widget-content-modal {
+  width: 400px;
+  height: 180px;
+  z-index: 11;
+  background-color: rgb(43, 69, 112);
+  border: 2px solid rgb(168, 208, 219);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+#page-container > #edit-widget-content-modal-backdrop > #edit-widget-content-modal > h2 {
+  margin: 8px 0 8px 0;
+  height: 20%;
+  width: 100%;
+  text-align: center;
+  color: rgb(168, 208, 219);
+}
+#page-container > #edit-widget-content-modal-backdrop > #edit-widget-content-modal > #content-input-container {
+  width: 100%;
+  height: 28%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#page-container > #edit-widget-content-modal-backdrop > #edit-widget-content-modal > #content-input-container > #modal-input {
+  width: 80%;
+  font-size: 1.2rem;
+  border: none;
+  border-bottom: 2px solid rgb(168, 208, 219);
+  border-radius: 4px;
+  padding: 4px;
+  background-color: rgb(43, 69, 112);
+  color: rgb(168, 208, 219);
+}
+#page-container > #edit-widget-content-modal-backdrop > #edit-widget-content-modal > #content-input-container > #modal-input:focus {
+  outline: none;
+  caret-color: rgb(168, 208, 219);
+}
+#page-container > #edit-widget-content-modal-backdrop > #edit-widget-content-modal > #content-input-container > #modal-input::placeholder {
+  color: rgb(168, 208, 219);
+  font-size: 1rem;
+  font-style: italic;
+}
+#page-container > #edit-widget-content-modal-backdrop > #edit-widget-content-modal > #modal-btns {
+  width: 100%;
+  height: 52%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+#page-container > #edit-widget-content-modal-backdrop > #edit-widget-content-modal > #modal-btns > button {
+  text-decoration: none;
+  font-size: 1.2rem;
+  padding: 8px;
+  background-color: rgb(228, 146, 115);
+  color: rgb(43, 69, 112);
+  border-radius: 8px;
+  transition: 0.3s ease all;
+  border: none;
+}
+#page-container > #edit-widget-content-modal-backdrop > #edit-widget-content-modal > #modal-btns > button:hover {
+  cursor: pointer;
 }
